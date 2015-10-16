@@ -8,6 +8,8 @@
 		var vertices = {};
 		var vertexSize = 16;
 		var nextIndex = 0;
+		var selectedVertex = -1;
+		var directed = false;
 		
 		
 		function initialise()
@@ -22,11 +24,30 @@
 		{
 			context.fillStyle = "#DDDDDD";
 			context.fillRect(0, 0, canvas.width, canvas.height);
+			// draw edges
+			for (var id in vertices)
+			{
+				const vertex = vertices[id];
+				const neighbors = vertex.edges;
+				for (var i = 0; i < neighbors.length; ++i)
+				{
+					const neighbor = vertices[neighbors[i]];
+					context.beginPath();
+					context.moveTo(vertex.x, vertex.y);
+					context.lineTo(neighbor.x, neighbor.y);
+					context.stroke();
+				}
+			}
+			//draw vertices on top
 			for (var id in vertices)
 			{
 				const vertex = vertices[id];
 				context.beginPath();
 				context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
+				context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
+				context.fill();
+				context.lineWidth = 3;
+				context.strokeStyle = "#000000";
 				context.stroke();
 			}
 		}
@@ -37,23 +58,66 @@
 			return nextIndex++;
 		}
 		
-		function onMouseClick(event)
+		function getVertexAt(x, y)
 		{
-			const x = event.pageX;
-			const y = event.pageY;
-			for (var i = 0; i < vertices.length; ++i)
+			for (var id in vertices)
 			{
-				const difX = vertices[i].x;
-				const difY = vertices[i].y;
+				const vertex = vertices[id];
+				const difX = vertex.x - x;
+				const difY = vertex.y - y;
 				if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
 				{
-					return;
+					return id;
 				}
 			}
-			vertices[newIndex()] = {x:x, y:y};
+			return -1;
+		}
+		
+		function addEdge(u, v)
+		{
+			vertices[u].edges.push(v);
+			if (!directed)
+			{
+				vertices[v].edges.push(u);
+			}
+		}
+		
+		function onMouseClick(event)
+		{
+			const x = event.clientX - canvas.getBoundingClientRect().left;
+			const y = event.clientY - canvas.getBoundingClientRect().top;
+			const vertexClickedOn = getVertexAt(x, y);
+			// didn't click on vertex -> create new vertex
+			if (vertexClickedOn == -1)
+			{
+				if (selectedVertex != -1)
+				{
+					addEdge(selectedVertex, vertexClickedOn);
+				}
+				vertices[newIndex()] = {x:x, y:y, edges:[]};
+			}
+			else // selected a vertex -> select or create edge between previous selected vertex
+			{
+				if (selectedVertex != -1)
+				{
+					// if clicked on self, unselect
+					if (vertexClickedOn != selectedVertex)
+					{
+						addEdge(selectedVertex, vertexClickedOn);
+					}
+					selectedVertex = -1;
+				}
+				else
+				{
+					selectedVertex = vertexClickedOn;
+				}
+			}
+			
 			
 			redraw();
 		}
+		
+		
 	</script>
 </head>
 
