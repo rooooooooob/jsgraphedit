@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script>
+		var canvas;
+		var context;
+		var vertices = {};
+		var vertexSize = 16;
+		var nextIndex = 0;
+		
+		
+		function initialise()
+		{
+			canvas = document.getElementById("myCanvas");
+			context = canvas.getContext("2d");
+			canvas.addEventListener("mousedown", onMouseClick, false);
+			redraw();
+		}
+		
+		function redraw()
+		{
+			context.fillStyle = "#DDDDDD";
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			for (var id in vertices)
+			{
+				const vertex = vertices[id];
+				context.beginPath();
+				context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
+				context.stroke();
+			}
+		}
+		
+		function newIndex()
+		{
+			// todo reuse indices?
+			return nextIndex++;
+		}
+		
+		function onMouseClick(event)
+		{
+			const x = event.pageX;
+			const y = event.pageY;
+			for (var i = 0; i < vertices.length; ++i)
+			{
+				const difX = vertices[i].x;
+				const difY = vertices[i].y;
+				if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
+				{
+					return;
+				}
+			}
+			vertices[newIndex()] = {x:x, y:y};
+			
+			redraw();
+		}
+	</script>
+</head>
+
+<body onLoad = initialise()>
+
+	<canvas id="myCanvas" width="640" height="480"
+	style="border:1px solid #d3d3d3;">
+	Your browser does not support the canvas element.
+	</canvas>
+
+
+</body>
+
+</html>
