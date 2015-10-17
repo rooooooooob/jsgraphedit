@@ -49,3 +49,9 @@ function addEdge(vertices, u, v)
 		vertices[v].edges.push(u);
 	}
 }
+
+function addVertex(vertices, x, y)
+{
+	vertices.push({x:x, y:y, edges:[]});
+	return vertices.length - 1;
+}

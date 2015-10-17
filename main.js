@@ -84,10 +84,10 @@ function onMouseClick(event)
 		switch (mode)
 		{
 		case Modes.INSERT:
-			vertices.push({x:x, y:y, edges:[]});
+			const addedVertex = addVertex(vertices, x, y);
 			if (selectedVertex != -1)
 			{
-				addEdge(vertices, selectedVertex, vertices.length - 1);
+				addEdge(vertices, selectedVertex, addedVertex);
 			}
 			break;
 		case Modes.REMOVE:
@@ -129,6 +129,38 @@ function onMouseClick(event)
 	
 	
 	redraw();
+}
+
+function readFromList()
+{
+	var inputs = document.getElementById("adj_list_textbox_id").value.match(/\S+/g).map(function(str) { return parseInt(str, 10) });
+	const badIndex = inputs.indexOf(NaN);
+	if (badIndex != -1)
+	{
+		alert("could not read parameter " + badIndex);
+		return;
+	}
+	for (var i = 0; i < inputs[0]; ++i)
+	{
+		addVertex(vertices, Math.random() * canvas.width, Math.random() * canvas.height);
+	}
+	var currentVertex = 0;
+	var index = 1;
+	const n = inputs[0];
+	for ( ; currentVertex < n ; )
+	{
+		const degree = inputs[index++];
+		for (var j = 0; j < degree; ++j)
+		{
+			addEdge(vertices, currentVertex, inputs[index++]);
+		}
+		++currentVertex;
+	}
+	redraw();
+}
+
+function exportToList()
+{
 }
 
 function setMode(newMode)
