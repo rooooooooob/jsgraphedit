@@ -1,7 +1,7 @@
 var canvas;
 var context;
 var vertices = [];
-var vertexSize = 16;
+const vertexSize = 16;
 var selectedVertex = -1;
 var directed = false;
 const Modes = {
@@ -12,7 +12,8 @@ const Modes = {
 var mode = Modes.INSERT;
 var edgeHighlights = {};
 var lastRandomColourIndex = 0;
-var randomColours = [
+const randomColours = [
+	"#FF0000",
 	"#0000FF",
 	"#00AA00",
 	"#FF00FF",
@@ -29,7 +30,8 @@ function initialise()
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
 	
-	vertices = generateConnected({n: 6});
+	//readFromList();
+	vertices = generateConnected({n: 13});
 	const m = countEdges(vertices);
 	if (m % 2 == 1)
 	{
@@ -51,7 +53,14 @@ function initialise()
 	for (var i = 0; i < twopaths.length; ++i)
 	{
 		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
-		edgeHighlights[key] = twopaths[i];
+		for (var j = 0; j < twopaths[i].length; ++j)
+		{
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
+			edgeHighlights[key].push(twopaths[i][j]);
+		}
 	}
 	
 	redraw();
@@ -86,7 +95,7 @@ function redraw()
 			const v = edgeHighlights[col][i][1];
 			context.beginPath();
 			context.strokeStyle = col;
-			context.lineWidth = 2;
+			context.lineWidth = 4;
 			context.moveTo(vertices[u].x, vertices[u].y);
 			context.lineTo(vertices[v].x, vertices[v].y);
 			context.stroke();
@@ -100,7 +109,7 @@ function redraw()
 		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
 		if (isCut(vertices, id))
-			context.fillStyle = "#FF0000";
+			context.fillStyle = (id == selectedVertex ? "#FF0000" : "#BB0000");
 		context.fill();
 		context.lineWidth = 3;
 		context.strokeStyle = "#000000";
@@ -223,6 +232,7 @@ function readFromList()
 		}
 		++currentVertex;
 	}
+	edgeHighlights = {};
 	redraw();
 }
 
