@@ -133,6 +133,7 @@ function onMouseClick(event)
 				if (mode == Modes.REMOVE)
 				{
 					removeVertex(vertices, selectedVertex);
+					selectedVertex = -1;
 				}
 				selectedVertex = -1;
 			}
