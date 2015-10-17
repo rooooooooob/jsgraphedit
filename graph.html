@@ -8,8 +8,7 @@
 	<script type="text/javascript" charset="utf-8">
 		var canvas;
 		var context;
-		var vertices = {};
-		var vertexCount = 0;
+		var vertices = [];
 		var vertexSize = 16;
 		var selectedVertex = -1;
 		var directed = false;
@@ -33,7 +32,7 @@
 			context.fillStyle = "#DDDDDD";
 			context.fillRect(0, 0, canvas.width, canvas.height);
 			// draw edges
-			for (var id in vertices)
+			for (var id = 0; id < vertices.length; ++id)
 			{
 				const vertex = vertices[id];
 				const neighbors = vertex.edges;
@@ -41,13 +40,14 @@
 				{
 					const neighbor = vertices[neighbors[i]];
 					context.beginPath();
+					context.lineWidth = 3;
 					context.moveTo(vertex.x, vertex.y);
 					context.lineTo(neighbor.x, neighbor.y);
 					context.stroke();
 				}
 			}
 			//draw vertices on top
-			for (var id in vertices)
+			for (var id = 0; id < vertices.length; ++id)
 			{
 				const vertex = vertices[id];
 				context.beginPath();
@@ -57,14 +57,24 @@
 				context.lineWidth = 3;
 				context.strokeStyle = "#000000";
 				context.stroke();
+				context.font = "12px Arial";
+				context.lineWidth = 1;
+				context.textAlign = "center";
+				context.textBaseline = "middle";
+				context.fillStyle = "#000000";
+				context.fillText(id, vertex.x, vertex.y);
 			}
 		}
 		
-		
 		function removeVertex(id)
 		{
-			delete vertices[id];
-			for (var vid in vertices)
+			const lastID = vertices.length - 1;
+			for (var property in vertices[id])
+			{
+				vertices[id][property] = vertices[lastID][property];
+			}
+			vertices.pop();
+			for (var vid = 0; vid < vertices.length; ++vid)
 			{
 				const neighbors = vertices[vid].edges;
 				for (var i = 0; i < neighbors.length; ++i)
@@ -73,16 +83,18 @@
 					{
 						neighbors[i] = neighbors[neighbors.length - 1];
 						neighbors.pop();
-						break;
+					}
+					else if (neighbors[i] == lastID)
+					{
+						neighbors[i] = id;
 					}
 				}
 			}
-			--vertexCount;
 		}
 		
 		function getVertexAt(x, y)
 		{
-			for (var id in vertices)
+			for (var id = 0; id < vertices.length; ++id)
 			{
 				const vertex = vertices[id];
 				const difX = vertex.x - x;
@@ -129,10 +141,10 @@
 				switch (mode)
 				{
 				case Modes.INSERT:
-					vertices[vertexCount++] = {x:x, y:y, edges:[]};
+					vertices.push({x:x, y:y, edges:[]});
 					if (selectedVertex != -1)
 					{
-						addEdge(selectedVertex, vertexCount - 1);
+						addEdge(selectedVertex, vertices.length - 1);
 					}
 					break;
 				case Modes.REMOVE:
