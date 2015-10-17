@@ -52,6 +52,8 @@ function redraw()
 		context.beginPath();
 		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
+		if (isCut(vertices, id))
+			context.fillStyle = "#FF0000";
 		context.fill();
 		context.lineWidth = 3;
 		context.strokeStyle = "#000000";
