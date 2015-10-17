@@ -18,7 +18,7 @@ function initialise()
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
 	
-	generateConnected({n: 10});
+	vertices = generateTree({n: 10});
 	randomizeVertexPositions();
 	
 	
@@ -121,6 +121,7 @@ function onMouseClick(event)
 				{
 				case Modes.INSERT:
 					addEdge(vertices, selectedVertex, vertexClickedOn);
+					selectedVertex = vertexClickedOn;
 					break;
 				case Modes.REMOVE:
 					removeEdge(vertices, selectedVertex, vertexClickedOn);
@@ -133,8 +134,8 @@ function onMouseClick(event)
 				{
 					removeVertex(vertices, selectedVertex);
 				}
+				selectedVertex = -1;
 			}
-			selectedVertex = -1;
 		}
 		else
 		{
