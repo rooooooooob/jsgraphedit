@@ -36,6 +36,7 @@ function removeVertex(vertices, id)
 			}
 		}
 	}
+	return lastID;
 }
 
 function addEdge(vertices, u, v)
@@ -56,4 +57,22 @@ function addVertex(vertices, x, y)
 {
 	vertices.push({x:x, y:y, edges:[]});
 	return vertices.length - 1;
+}
+
+function cloneGraph(vertices)
+{
+	var newVertices = new Array(vertices.length);
+	for (var i = 0; i < vertices.length; ++i)
+	{
+		newVertices[i] = {
+			x : vertices[i].x,
+			y : vertices[i].y,
+			edges : new Array(vertices[i].edges.length)
+		}
+		for (var j = 0; j < vertices[i].edges.length; ++j)
+		{
+			newVertices[i].edges[j] = vertices[i].edges[j];
+		}
+	}
+	return newVertices;
 }

@@ -10,6 +10,17 @@ const Modes = {
 	MOVE : "move"
 };
 var mode = Modes.INSERT;
+var edgeHighlights = {};
+var lastRandomColourIndex = 0;
+var randomColours = [
+	"#0000FF",
+	"#00AA00",
+	"#FF00FF",
+	"#00AAAA",
+	"#FFAA00",
+	"#FFFF00",
+	"#8A2BE2"
+];
 
 
 function initialise()
@@ -18,10 +29,30 @@ function initialise()
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
 	
-	vertices = generateTree({n: 10});
+	vertices = generateConnected({n: 6});
+	const m = countEdges(vertices);
+	if (m % 2 == 1)
+	{
+		// add or remove an edge - we can keep it connected if it's complete by removing, else add one
+		if (m == vertices.length * (vertices.length - 1) / 2)
+		{
+			removeEdge(vertices, 0, 1);
+		}
+		else
+		{
+			placeRandomEdge(vertices);
+		}
+	}
 	randomizeVertexPositions();
 	
 	
+	
+	var twopaths = twopathDecompose(vertices);
+	for (var i = 0; i < twopaths.length; ++i)
+	{
+		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+		edgeHighlights[key] = twopaths[i];
+	}
 	
 	redraw();
 }
@@ -39,13 +70,29 @@ function redraw()
 		{
 			const neighbor = vertices[neighbors[i]];
 			context.beginPath();
+			context.strokeStyle = "#000000";
 			context.lineWidth = 3;
 			context.moveTo(vertex.x, vertex.y);
 			context.lineTo(neighbor.x, neighbor.y);
 			context.stroke();
 		}
 	}
-	//draw vertices on top
+	// draw coloured edge highlights on top
+	for (var col in edgeHighlights)
+	{
+		for (var i = 0; i < edgeHighlights[col].length; ++i)
+		{
+			const u = edgeHighlights[col][i][0];
+			const v = edgeHighlights[col][i][1];
+			context.beginPath();
+			context.strokeStyle = col;
+			context.lineWidth = 2;
+			context.moveTo(vertices[u].x, vertices[u].y);
+			context.lineTo(vertices[v].x, vertices[v].y);
+			context.stroke();
+		}
+	}
+	// draw vertices on top
 	for (var id = 0; id < vertices.length; ++id)
 	{
 		const vertex = vertices[id];
