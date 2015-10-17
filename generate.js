@@ -3,6 +3,14 @@ function generateConnected(settings)
 	// create a spanning tree
 	var vertices = generateTree(settings);
 	// add more edges randomly
+	const n = settings.n;
+	// place a uniformly at random amount of vertices between 0 and n choose 2
+	// but place at least n - 1 for a spanning tree to ensure connectivity
+	const m = Math.floor(Math.random() * n * (n - 1) / 2);
+	for (var i = n - 1; i < m; ++i)
+	{
+		placeRandomEdge(vertices);
+	}
 	return vertices;
 }
 
@@ -78,4 +86,19 @@ function generateNull(n)
 		addVertex(vertices);
 	}
 	return vertices;
+}
+
+function placeRandomEdge(vertices)
+{
+	if (vertices.length > 1)
+	{
+		var u, v;
+		do
+		{
+			u = Math.floor(Math.random() * vertices.length);
+			v = Math.floor(Math.random() * vertices.length);
+		}
+		while (u == v || vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1 )
+		addEdge(vertices, u, v);
+	}
 }

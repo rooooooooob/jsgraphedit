@@ -40,13 +40,15 @@ function removeVertex(vertices, id)
 
 function addEdge(vertices, u, v)
 {
+	addArc(vertices, u, v);
+	addArc(vertices, v, u);
+}
+
+function addArc(vertices, u, v)
+{
 	if (vertices[u].edges.indexOf(v) == -1)
 	{
 		vertices[u].edges.push(v);
-	}
-	if (!directed && vertices[v].edges.indexOf(u) == -1)
-	{
-		vertices[v].edges.push(u);
 	}
 }
 

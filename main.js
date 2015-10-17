@@ -18,8 +18,7 @@ function initialise()
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
 	
-	//vertices = generateTree({n: 10});
-	vertices = fromPrufer([0, 6, 5, 5, 0]);
+	vertices = generateConnected({n: 10});
 	randomizeVertexPositions();
 	
 	redraw();
