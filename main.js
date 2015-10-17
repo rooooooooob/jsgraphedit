@@ -17,6 +17,11 @@ function initialise()
 	canvas = document.getElementById("myCanvas");
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
+	
+	//vertices = generateTree({n: 10});
+	vertices = fromPrufer([0, 6, 5, 5, 0]);
+	randomizeVertexPositions();
+	
 	redraw();
 }
 
@@ -202,4 +207,13 @@ function setModeToRemove()
 function setModeToMove()
 {
 	setMode(Modes.MOVE);
+}
+
+function randomizeVertexPositions()
+{
+	for (var u = 0; u < vertices.length; ++u)
+	{
+		vertices[u].x = Math.random() * canvas.width;
+		vertices[u].y = Math.random() * canvas.height;
+	}
 }
