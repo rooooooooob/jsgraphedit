@@ -32,8 +32,8 @@ function generateTree(settings)
 function fromPrufer(seq)
 {
 	var vertices = generateNull(seq.length + 2);
-	s = seq.slice().reverse();
-	l = new Array(vertices.length);
+	var s = seq.slice().reverse();
+	var l = new Array(vertices.length);
 	for (var i = 0; i < l.length; ++i)
 	{
 		l[i] = i;
@@ -62,9 +62,52 @@ function fromPrufer(seq)
 	return vertices;
 }
 
+function toPrufer(vertices)
+{
+	var seq = [];
+	
+	var remaining = new Array(vertices.length);
+	var degrees = new Array(vertices.length);
+	for (var i = 0; i < remaining.length; ++i)
+	{
+		remaining[i] = i;
+		degrees[i] = vertices[i].edges.length;
+	}
+	var minleaf;
+	
+	for (var i = 0; i < vertices.length - 2; ++i)
+	{
+		minleaf = -1;
+		for (var j = 0; j < remaining.length - i; ++j)
+		{
+			if ((minleaf == -1 || remaining[j] < remaining[minleaf]) && degrees[remaining[j]] == 1)
+			{
+				minleaf = j;
+			}
+		}
+		var stem = -1;
+		const neighbors = vertices[remaining[minleaf]].edges;
+		for (var j = 0; stem == -1 && j < neighbors.length; ++j)
+		{
+			for (var k = 0; stem == -1 && k < remaining.length - i; ++k)
+			{
+				if (remaining[k] == neighbors[j])
+				{
+					stem = neighbors[j];
+				}
+			}
+		}
+		seq.push(stem);
+		--degrees[stem];
+		remaining[minleaf] = remaining[remaining.length - 1 - i];
+	}
+	
+	return seq;
+}
+
 function generateComplete(settings)
 {
-	vertices = generateNull(settings.n);
+	var vertices = generateNull(settings.n);
 	for (var i = 0; i < settings.n; ++i)
 	{
 		for (var j = 0; j < settings.n; ++j)
@@ -80,7 +123,7 @@ function generateComplete(settings)
 
 function generateNull(n)
 {
-	vertices = []
+	var vertices = []
 	for (var i = 0; i < n; ++i)
 	{
 		addVertex(vertices);
@@ -92,7 +135,8 @@ function placeRandomEdge(vertices)
 {
 	if (vertices.length > 1)
 	{
-		var u, v;
+		var u;
+		var v;
 		do
 		{
 			u = Math.floor(Math.random() * vertices.length);

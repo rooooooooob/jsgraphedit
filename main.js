@@ -18,8 +18,10 @@ function initialise()
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
 	
-	vertices = generateConnected({n: 10});
+	generateConnected({n: 10});
 	randomizeVertexPositions();
+	
+	
 	
 	redraw();
 }
