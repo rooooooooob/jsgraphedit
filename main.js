@@ -6,7 +6,8 @@ var selectedVertex = -1;
 var directed = false;
 const Modes = {
 	INSERT : "insert",
-	REMOVE : "remove"
+	REMOVE : "remove",
+	MOVE : "move"
 };
 var mode = Modes.INSERT;
 
@@ -93,6 +94,14 @@ function onMouseClick(event)
 		case Modes.REMOVE:
 			selectedVertex = -1;
 			break;
+		case Modes.MOVE:
+			if (selectedVertex != -1)
+			{
+				vertices[selectedVertex].x = x;
+				vertices[selectedVertex].y = y;
+				selectedVertex = -1;
+			}
+			break;
 		}
 	}
 	else // selected a vertex -> select or create edge between previous selected vertex
@@ -133,6 +142,7 @@ function onMouseClick(event)
 
 function readFromList()
 {
+	vertices = []
 	var inputs = document.getElementById("adj_list_textbox_id").value.match(/\S+/g).map(function(str) { return parseInt(str, 10) });
 	const badIndex = inputs.indexOf(NaN);
 	if (badIndex != -1)
@@ -187,4 +197,9 @@ function setModeToInsert()
 function setModeToRemove()
 {
 	setMode(Modes.REMOVE);
+}
+
+function setModeToMove()
+{
+	setMode(Modes.MOVE);
 }
