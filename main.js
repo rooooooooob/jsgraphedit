@@ -161,6 +161,17 @@ function readFromList()
 
 function exportToList()
 {
+	var output = vertices.length + "\n";
+	for (var i = 0; i < vertices.length; ++i)
+	{
+		output += " " + vertices[i].edges.length;
+		for (var j = 0; j < vertices[i].edges.length; ++j)
+		{
+			output += " " + vertices[i].edges[j];
+		}
+		output += "\n";
+	}
+	document.getElementById("adj_list_textbox_id").value = output;
 }
 
 function setMode(newMode)
