@@ -1,3 +1,5 @@
+"use strict";
+
 function generateConnected(settings)
 {
 	// create a spanning tree

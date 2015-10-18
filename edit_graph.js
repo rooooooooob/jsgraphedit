@@ -1,3 +1,5 @@
+"use strict";
+
 function removeArc(vertices, u, v)
 {
 	var neighbors = vertices[u].edges;

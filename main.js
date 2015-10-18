@@ -1,3 +1,5 @@
+"use strict";
+
 var canvas;
 var context;
 var vertices = [];
@@ -18,9 +20,16 @@ const randomColours = [
 	"#00AA00",
 	"#FF00FF",
 	"#00AAAA",
+	"#800000",
 	"#FFAA00",
 	"#FFFF00",
-	"#8A2BE2"
+	"#8A2BE2",
+	"#7FFF00",
+	"#BDB76B",
+	"#FF7F50",
+	"#7FFFD4",
+	"#4B0082",
+	"#90EE90"
 ];
 
 
@@ -48,21 +57,6 @@ function initialise()
 	randomizeVertexPositions();
 	
 	
-	
-	var twopaths = twopathDecompose(vertices);
-	for (var i = 0; i < twopaths.length; ++i)
-	{
-		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
-		for (var j = 0; j < twopaths[i].length; ++j)
-		{
-			if (!edgeHighlights[key])
-			{
-				edgeHighlights[key] = [];
-			}
-			edgeHighlights[key].push(twopaths[i][j]);
-		}
-	}
-	
 	redraw();
 }
 
@@ -73,7 +67,7 @@ function redraw()
 	// draw edges
 	for (var id = 0; id < vertices.length; ++id)
 	{
-		const vertex = vertices[id];
+		let vertex = vertices[id];
 		const neighbors = vertex.edges;
 		for (var i = 0; i < neighbors.length; ++i)
 		{
@@ -104,12 +98,12 @@ function redraw()
 	// draw vertices on top
 	for (var id = 0; id < vertices.length; ++id)
 	{
-		const vertex = vertices[id];
+		let vertex = vertices[id];
 		context.beginPath();
 		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
 		if (isCut(vertices, id))
-			context.fillStyle = (id == selectedVertex ? "#FF0000" : "#BB0000");
+			context.fillStyle = (id == selectedVertex ? "#770000" : "#CC0000");
 		context.fill();
 		context.lineWidth = 3;
 		context.strokeStyle = "#000000";
@@ -249,6 +243,26 @@ function exportToList()
 		output += "\n";
 	}
 	document.getElementById("adj_list_textbox_id").value = output;
+}
+
+function runTwopathDecomp()
+{
+	edgeHighlights = {};
+	var twopaths = twopathDecompose(vertices);
+	for (var i = 0; i < twopaths.length; ++i)
+	{
+		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+		for (var j = 0; j < twopaths[i].length; ++j)
+		{
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
+			edgeHighlights[key].push(twopaths[i][j]);
+		}
+	}
+	
+	redraw();
 }
 
 function setMode(newMode)

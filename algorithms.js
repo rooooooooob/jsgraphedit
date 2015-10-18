@@ -1,3 +1,5 @@
+"use strict";
+
 function dfs(vertices, start)
 {
 	var order = [start];
@@ -130,7 +132,7 @@ function twopathDecompose(vertices)
 				// more than 2 components, so try them all
 				if (g[i].edges.length == 1)
 				{
-					const x = g[i].edges[0];
+					let x = g[i].edges[0];
 					if (g[x].edges.length == 2)
 					{
 						u = i;
@@ -175,7 +177,7 @@ function twopathDecompose(vertices)
 				{
 					if (g[i].edges.length == 1)
 					{
-						const x = g[i].edges[0];
+						let x = g[i].edges[0];
 						for (var j = 0; !found && j < g[x].edges.length; ++j)
 						{
 							const y = g[x].edges[j];
