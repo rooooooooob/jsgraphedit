@@ -148,3 +148,39 @@ function placeRandomEdge(vertices)
 		addEdge(vertices, u, v);
 	}
 }
+
+function generateHamiltonian(settings)
+{
+	const n = settings.n;
+	var vertices = generateNull(n);
+	// make a random hamiltonian cycle
+	var perm = randomPermutation(n);
+	for (var i = 0; i < n; ++i)
+	{
+		addEdge(vertices, perm[i], perm[(i + 1) % n]);
+	}
+	// then add random edges
+	const m = Math.floor(Math.random() * n * (n - 1) / 2);
+	for (var i = n - 1; i < m; ++i)
+	{
+		placeRandomEdge(vertices);
+	}
+	return vertices;
+}
+
+function randomPermutation(n)
+{
+	var output = new Array(n);
+	for (var i = 0; i < n; ++i)
+	{
+		output[i] = i;
+	}
+	for (var i = n - 1; i > 0; --i)
+	{
+		var j = Math.floor(Math.random() * (i + 1));
+		var tmp = output[i];
+		output[i] = output[j];
+		output[j] = tmp;
+	}
+	return output;
+}

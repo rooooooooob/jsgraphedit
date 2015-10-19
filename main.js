@@ -302,6 +302,11 @@ function menuGenerateComplete()
 	menuGenerate(generateComplete);
 }
 
+function menuGenerateHamiltonian()
+{
+	menuGenerate(generateHamiltonian);
+}
+
 function setMode(newMode)
 {
 	mode = newMode;
