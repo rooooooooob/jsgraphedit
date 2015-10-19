@@ -46,10 +46,17 @@
 3 3 7 9
 3 1 5 8
 	</textarea>
-	<br>
+	<br><a href = "https://en.wikipedia.org/wiki/Adjacency_list">Adjacency List</a>:
 	<button onClick="readFromList()">Import</button>
 	<button onClick="exportToList()">Export</button>
-	n: <input id="gen_vertices_id" type="number" min="0" style="width: 64px;" value="9">Generate:
+	
+	<br><a href="https://en.wikipedia.org/wiki/Pr%C3%BCfer_sequence">Pr&uuml;fer Sequence</a>:
+	<input id="prufer_textbox_id" type="text" style="width: 256px;" value="0 0">
+	<button onClick="importPrufer()">Import</button>
+	<button onClick="exportPrufer()">Export</button>
+	
+	<br>Random Generation:
+	n: <input id="gen_vertices_id" type="number" min="0" style="width: 64px;" value="9">
 	<button onClick="menuGenerateTree()">Tree</button>
 	<button onClick="menuGenerateConnected()">Connected</button>
 	<button onClick="menuGenerateComplete()">Complete</button>

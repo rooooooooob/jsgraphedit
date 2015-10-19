@@ -256,6 +256,40 @@ function exportToList()
 	document.getElementById("adj_list_textbox_id").value = output;
 }
 
+function importPrufer()
+{
+	var seq = document.getElementById("prufer_textbox_id").value.match(/\S+/g).map(function(str) { return parseInt(str, 10) });
+	var failed = false;
+	for (var i = 0; i < seq.length; ++i)
+	{
+		if (seq[i] == NaN)
+		{
+			alert("elements in sequence must be numbers separated by whitespace");
+			failed = true;
+		}
+		else if (seq[i] < 0 || seq >= seq.length + 2)
+		{
+			alert("elements must in the range [0, n) for a sequence of length n - 2 to generate a tree on n vertices with (n = " + seq.length + 2 + ")");
+			failed = true;
+		}
+	}
+	if (!failed)
+	{
+		vertices = fromPrufer(seq);
+		
+		edgeHighlights = {};
+		
+		randomizeVertexPositions();
+		
+		redraw();
+	}
+}
+
+function exportPrufer()
+{
+	document.getElementById("prufer_textbox_id").value = toPrufer(vertices).join(" ");
+}
+
 function runTwopathDecomp()
 {
 	var evenSize = {
