@@ -265,6 +265,43 @@ function runTwopathDecomp()
 	redraw();
 }
 
+function menuGenerate(genFunc)
+{
+	const n = parseInt(document.getElementById("gen_vertices_id").value)
+
+	if (n != NaN)
+	{
+		var settings = {n : n};
+	
+		vertices = genFunc(settings);
+		
+		edgeHighlights = {};
+
+		randomizeVertexPositions();
+		
+		redraw();
+	}
+	else
+	{
+		alert("please enter a number");
+	}
+}
+
+function menuGenerateTree()
+{
+	menuGenerate(generateTree);
+}
+
+function menuGenerateConnected()
+{
+	menuGenerate(generateConnected);
+}
+
+function menuGenerateComplete()
+{
+	menuGenerate(generateComplete);
+}
+
 function setMode(newMode)
 {
 	mode = newMode;
