@@ -72,14 +72,7 @@ function isTree(vertices)
 
 function twopathDecompose(vertices)
 {
-	var paths = [];
-	if (!isConnected(vertices))
-	{
-		// todo handle components separately if they're all even size?
-		alert("only works on connected graphs");
-		return paths;
-	}
-	
+	var paths = [];	
 	// make a copy since this algorithm is destructive
 	var g = cloneGraph(vertices);
 	

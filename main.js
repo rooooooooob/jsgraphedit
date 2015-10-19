@@ -31,13 +31,24 @@ const randomColours = [
 	"#4B0082",
 	"#90EE90"
 ];
-
+var satisfyConnected;
+var satisfyTree;
 
 function initialise()
 {
 	canvas = document.getElementById("myCanvas");
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
+	
+	satisfyConnected = {
+		str : "connected",
+		func : isConnected
+	};
+	satisfyTree = {
+		str : "tree",
+		funct : isTree
+	};
+		
 	
 	//readFromList();
 	vertices = generateConnected({n: 13});
@@ -247,31 +258,39 @@ function exportToList()
 
 function runTwopathDecomp()
 {
-	edgeHighlights = {};
-	var twopaths = twopathDecompose(vertices);
-	for (var i = 0; i < twopaths.length; ++i)
+	var evenSize = {
+		str : "even size",
+		func : function(vertices) { return countEdges(vertices) % 2 == 0; }
+	};
+	if (require(vertices, [satisfyConnected, evenSize]))
 	{
-		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
-		for (var j = 0; j < twopaths[i].length; ++j)
+		edgeHighlights = {};
+		var twopaths = twopathDecompose(vertices);
+		for (var i = 0; i < twopaths.length; ++i)
 		{
-			if (!edgeHighlights[key])
+			const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+			for (var j = 0; j < twopaths[i].length; ++j)
 			{
-				edgeHighlights[key] = [];
+				if (!edgeHighlights[key])
+				{
+					edgeHighlights[key] = [];
+				}
+				edgeHighlights[key].push(twopaths[i][j]);
 			}
-			edgeHighlights[key].push(twopaths[i][j]);
 		}
+		
+		redraw();
 	}
-	
-	redraw();
 }
 
-function menuGenerate(genFunc)
+function menuGenerate(genFunc, settings, conditions)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)
 
 	if (n != NaN)
 	{
-		var settings = {n : n};
+		var settings = settings || {};	
+		settings.n = n;
 	
 		vertices = genFunc(settings);
 		
@@ -283,8 +302,21 @@ function menuGenerate(genFunc)
 	}
 	else
 	{
-		alert("please enter a number");
+		alert("please enter a number for vertices");
 	}
+}
+
+function require(vertices, conditions)
+{
+	for (var i = 0; i < conditions.length; ++i)
+	{
+		if (!conditions[i].func(vertices))
+		{
+			alert("Graph must satisfy: " + conditions[i].str);
+			return false;
+		}
+	}
+	return true;
 }
 
 function menuGenerateTree()
