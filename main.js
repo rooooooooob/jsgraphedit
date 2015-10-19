@@ -67,7 +67,7 @@ function redraw()
 	// draw edges
 	for (var id = 0; id < vertices.length; ++id)
 	{
-		let vertex = vertices[id];
+		var vertex = vertices[id];
 		const neighbors = vertex.edges;
 		for (var i = 0; i < neighbors.length; ++i)
 		{
@@ -98,7 +98,7 @@ function redraw()
 	// draw vertices on top
 	for (var id = 0; id < vertices.length; ++id)
 	{
-		let vertex = vertices[id];
+		vertex = vertices[id];
 		context.beginPath();
 		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
