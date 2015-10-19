@@ -308,13 +308,17 @@ function menuGenerate(genFunc, settings, conditions)
 
 function require(vertices, conditions)
 {
+	var failed = [];
 	for (var i = 0; i < conditions.length; ++i)
 	{
 		if (!conditions[i].func(vertices))
 		{
-			alert("Graph must satisfy: " + conditions[i].str);
-			return false;
+			failed.push(conditions[i].str);
 		}
+	}
+	if (failed.length > 0)
+	{
+		alert("Graph must satisfy: " + failed.join(", "));
 	}
 	return true;
 }
