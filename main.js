@@ -385,6 +385,11 @@ function menuGeneratePermutationGraph()
 	menuGenerate(generatePermutationGraph);
 }
 
+function menuGenerateSplit()
+{
+	menuGenerate(generateSplit);
+}
+
 function setMode(newMode)
 {
 	mode = newMode;

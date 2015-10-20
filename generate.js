@@ -144,7 +144,23 @@ function placeRandomEdge(vertices)
 			u = Math.floor(Math.random() * vertices.length);
 			v = Math.floor(Math.random() * vertices.length);
 		}
-		while (u == v || vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1 )
+		while (u == v || vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1)
+		addEdge(vertices, u, v);
+	}
+}
+
+function placeRandomEdgeBetween(vertices, U, V)
+{
+	if (vertices.length > 1)
+	{
+		var u;
+		var v;
+		do
+		{
+			u = U[Math.floor(Math.random() * U.length)];
+			v = V[Math.floor(Math.random() * V.length)];
+		}
+		while (vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1)
 		addEdge(vertices, u, v);
 	}
 }
@@ -184,6 +200,39 @@ function generatePermutationGraph(settings)
 			{
 				addEdge(vertices, i, j);
 			}
+		}
+	}
+	return vertices;
+}
+
+function generateSplit(settings)
+{
+	var vertices = generateNull(settings.n);
+	const cliqueSize = 1 + Math.floor(Math.random() * (settings.n - 2));
+	const indepSize = settings.n - cliqueSize;
+	// to figure out which ones should be in the indep set, just take the first cliqueSize of this
+	const perm = randomPermutation(settings.n);
+	var U = [];
+	var V = [];
+	for (var i = 0; i < cliqueSize; ++i)
+	{
+		U.push(perm[i]);
+	}
+	for (var i = 0; i < indepSize; ++i)
+	{
+		V.push(perm[i + cliqueSize]);
+	}
+	const crossEdges = Math.floor(Math.random() * (indepSize * cliqueSize));
+	for (var i = 0; i < crossEdges; ++i)
+	{
+		placeRandomEdgeBetween(vertices, U, V);
+	}
+	// now add edges between vertices of the clique
+	for (var i = 1; i < cliqueSize; ++i)
+	{
+		for (var j = 0; j < i; ++j)
+		{
+			addEdge(vertices, perm[i], perm[j]);
 		}
 	}
 	return vertices;
