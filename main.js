@@ -46,7 +46,7 @@ function initialise()
 	};
 	satisfyTree = {
 		str : "tree",
-		funct : isTree
+		func : isTree
 	};
 		
 	
@@ -287,7 +287,10 @@ function importPrufer()
 
 function exportPrufer()
 {
-	document.getElementById("prufer_textbox_id").value = toPrufer(vertices).join(" ");
+	if (require(vertices, [satisfyTree]))
+	{
+		document.getElementById("prufer_textbox_id").value = toPrufer(vertices).join(" ");
+	}
 }
 
 function runTwopathDecomp()
@@ -375,6 +378,11 @@ function menuGenerateComplete()
 function menuGenerateHamiltonian()
 {
 	menuGenerate(generateHamiltonian);
+}
+
+function menuGeneratePermutationGraph()
+{
+	menuGenerate(generatePermutationGraph);
 }
 
 function setMode(newMode)

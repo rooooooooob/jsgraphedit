@@ -168,6 +168,27 @@ function generateHamiltonian(settings)
 	return vertices;
 }
 
+function generatePermutationGraph(settings)
+{
+	const n = settings.n;
+	var vertices = generateNull(n);
+	// a permutation graph has (v_i, v_j) in E(G) iff i < j and p^1(i) > p^(j)
+	// for some permutation p (perm here represents p^1 since there's no reason to
+	// compute p^-1 since we only use p^-1 so just assume that p^-1 = perm and perm^-1 = p
+	const perm = randomPermutation(n);
+	for (var j = 1; j < n; ++j)
+	{
+		for (var i = 0; i < j; ++i)
+		{
+			if (perm[i] > perm[j])
+			{
+				addEdge(vertices, i, j);
+			}
+		}
+	}
+	return vertices;
+}
+
 function randomPermutation(n)
 {
 	var output = new Array(n);
