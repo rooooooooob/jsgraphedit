@@ -1,30 +1,44 @@
 "use strict";
 
-function removeArc(vertices, u, v)
+function removeArc(G, u, v)
 {
-	var neighbors = vertices[u].edges;
+	var neighbors = G.list[u].edges;
 	const vindex = neighbors.indexOf(v);
 	neighbors[vindex] = neighbors[neighbors.length - 1];
 	neighbors.pop();
 }
 
-function removeEdge(vertices, u, v)
+function createGraph(n)
 {
-	removeArc(vertices, u, v);
-	removeArc(vertices, v, u);
+	var G = {
+		list : [],
+		matrix : new Array(n)
+	};
+	
+	for (var i = 0; i < n; ++i)
+	{
+		addVertex(G);
+	}
+	return G;
 }
 
-function removeVertex(vertices, id)
+function removeEdge(G, u, v)
 {
-	const lastID = vertices.length - 1;
-	for (var property in vertices[id])
+	removeArc(G, u, v);
+	removeArc(G, v, u);
+}
+
+function removeVertex(G, id)
+{
+	const lastID = G.list.length - 1;
+	for (var property in G.list[id])
 	{
-		vertices[id][property] = vertices[lastID][property];
+		G.list[id][property] = G.list[lastID][property];
 	}
-	vertices.pop();
-	for (var vid = 0; vid < vertices.length; ++vid)
+	G.list.pop();
+	for (var vid = 0; vid < G.list.length; ++vid)
 	{
-		const neighbors = vertices[vid].edges;
+		const neighbors = G.list[vid].edges;
 		for (var i = 0; i < neighbors.length; ++i)
 		{
 			if (neighbors[i] == id)
@@ -41,40 +55,43 @@ function removeVertex(vertices, id)
 	return lastID;
 }
 
-function addEdge(vertices, u, v)
+function addEdge(G, u, v)
 {
-	addArc(vertices, u, v);
-	addArc(vertices, v, u);
+	addArc(G, u, v);
+	addArc(G, v, u);
 }
 
-function addArc(vertices, u, v)
+function addArc(G, u, v)
 {
-	if (vertices[u].edges.indexOf(v) == -1)
+	if (G.list[u].edges.indexOf(v) == -1)
 	{
-		vertices[u].edges.push(v);
+		G.list[u].edges.push(v);
 	}
 }
 
-function addVertex(vertices, x, y)
+function addVertex(G, x, y)
 {
-	vertices.push({x:x, y:y, edges:[]});
-	return vertices.length - 1;
+	G.list.push({x:x, y:y, edges:[]});
+	return G.list.length - 1;
 }
 
-function cloneGraph(vertices)
+function cloneGraph(G)
 {
-	var newVertices = new Array(vertices.length);
-	for (var i = 0; i < vertices.length; ++i)
+	var newVertices = new Array(G.list.length);
+	for (var i = 0; i < G.list.length; ++i)
 	{
 		newVertices[i] = {
-			x : vertices[i].x,
-			y : vertices[i].y,
-			edges : new Array(vertices[i].edges.length)
+			x : G.list[i].x,
+			y : G.list[i].y,
+			edges : new Array(G.list[i].edges.length)
 		}
-		for (var j = 0; j < vertices[i].edges.length; ++j)
+		for (var j = 0; j < G.list[i].edges.length; ++j)
 		{
-			newVertices[i].edges[j] = vertices[i].edges[j];
+			newVertices[i].edges[j] = G.list[i].edges[j];
 		}
 	}
-	return newVertices;
+	return {
+		list : newVertices,
+		matrix : [[]]
+	};
 }

@@ -3,7 +3,7 @@
 function generateConnected(settings)
 {
 	// create a spanning tree
-	var vertices = generateTree(settings);
+	var G = generateTree(settings);
 	// add more edges randomly
 	const n = settings.n;
 	// place a uniformly at random amount of vertices between 0 and n choose 2
@@ -11,9 +11,9 @@ function generateConnected(settings)
 	const m = Math.floor(Math.random() * n * (n - 1) / 2);
 	for (var i = n - 1; i < m; ++i)
 	{
-		placeRandomEdge(vertices);
+		placeRandomEdge(G);
 	}
-	return vertices;
+	return G;
 }
 
 function generateTree(settings)
@@ -33,9 +33,9 @@ function generateTree(settings)
 
 function fromPrufer(seq)
 {
-	var vertices = generateNull(seq.length + 2);
+	var G = createGraph(seq.length + 2);
 	var s = seq.slice().reverse();
-	var l = new Array(vertices.length);
+	var l = new Array(G.list.length);
 	for (var i = 0; i < l.length; ++i)
 	{
 		l[i] = i;
@@ -51,7 +51,7 @@ function fromPrufer(seq)
 		{
 			if (s.lastIndexOf(l[j]) == -1)
 			{
-				addEdge(vertices, s[s.length - 1], l[j]);
+				addEdge(G, s[s.length - 1], l[j]);
 				s.pop();
 				l[j] = l[l.length - 1];
 				l.pop();
@@ -60,24 +60,24 @@ function fromPrufer(seq)
 			}
 		}
 	}
-	addEdge(vertices, l[0], l[1]);
-	return vertices;
+	addEdge(G, l[0], l[1]);
+	return G;
 }
 
-function toPrufer(vertices)
+function toPrufer(G)
 {
 	var seq = [];
 	
-	var remaining = new Array(vertices.length);
-	var degrees = new Array(vertices.length);
+	var remaining = new Array(G.list.length);
+	var degrees = new Array(G.list.length);
 	for (var i = 0; i < remaining.length; ++i)
 	{
 		remaining[i] = i;
-		degrees[i] = vertices[i].edges.length;
+		degrees[i] = G.list[i].edges.length;
 	}
 	var minleaf;
 	
-	for (var i = 0; i < vertices.length - 2; ++i)
+	for (var i = 0; i < G.list.length - 2; ++i)
 	{
 		minleaf = -1;
 		for (var j = 0; j < remaining.length - i; ++j)
@@ -88,7 +88,7 @@ function toPrufer(vertices)
 			}
 		}
 		var stem = -1;
-		const neighbors = vertices[remaining[minleaf]].edges;
+		const neighbors = G.list[remaining[minleaf]].edges;
 		for (var j = 0; stem == -1 && j < neighbors.length; ++j)
 		{
 			for (var k = 0; stem == -1 && k < remaining.length - i; ++k)
@@ -109,49 +109,39 @@ function toPrufer(vertices)
 
 function generateComplete(settings)
 {
-	var vertices = generateNull(settings.n);
+	var G = createGraph(settings.n);
 	for (var i = 0; i < settings.n; ++i)
 	{
 		for (var j = 0; j < settings.n; ++j)
 		{
 			if (i != j)
 			{
-				addArc(vertices, i, j);
+				addArc(G, i, j);
 			}
 		}
 	}
-	return vertices;
+	return G;
 }
 
-function generateNull(n)
+function placeRandomEdge(G)
 {
-	var vertices = []
-	for (var i = 0; i < n; ++i)
-	{
-		addVertex(vertices);
-	}
-	return vertices;
-}
-
-function placeRandomEdge(vertices)
-{
-	if (vertices.length > 1)
+	if (G.list.length > 1)
 	{
 		var u;
 		var v;
 		do
 		{
-			u = Math.floor(Math.random() * vertices.length);
-			v = Math.floor(Math.random() * vertices.length);
+			u = Math.floor(Math.random() * G.list.length);
+			v = Math.floor(Math.random() * G.list.length);
 		}
-		while (u == v || vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1)
-		addEdge(vertices, u, v);
+		while (u == v || G.list[u].edges.indexOf(v) != -1 || G.list[v].edges.indexOf(u) != -1)
+		addEdge(G, u, v);
 	}
 }
 
-function placeRandomEdgeBetween(vertices, U, V)
+function placeRandomEdgeBetween(G, U, V)
 {
-	if (vertices.length > 1)
+	if (G.list.length > 1)
 	{
 		var u;
 		var v;
@@ -160,34 +150,34 @@ function placeRandomEdgeBetween(vertices, U, V)
 			u = U[Math.floor(Math.random() * U.length)];
 			v = V[Math.floor(Math.random() * V.length)];
 		}
-		while (vertices[u].edges.indexOf(v) != -1 || vertices[v].edges.indexOf(u) != -1)
-		addEdge(vertices, u, v);
+		while (G.list[u].edges.indexOf(v) != -1 || G.list[v].edges.indexOf(u) != -1)
+		addEdge(G, u, v);
 	}
 }
 
 function generateHamiltonian(settings)
 {
 	const n = settings.n;
-	var vertices = generateNull(n);
+	var G = createGraph(n);
 	// make a random hamiltonian cycle
 	var perm = randomPermutation(n);
 	for (var i = 0; i < n; ++i)
 	{
-		addEdge(vertices, perm[i], perm[(i + 1) % n]);
+		addEdge(G, perm[i], perm[(i + 1) % n]);
 	}
 	// then add random edges
 	const m = Math.floor(Math.random() * n * (n - 1) / 2);
 	for (var i = n - 1; i < m; ++i)
 	{
-		placeRandomEdge(vertices);
+		placeRandomEdge(G);
 	}
-	return vertices;
+	return G;
 }
 
 function generatePermutationGraph(settings)
 {
 	const n = settings.n;
-	var vertices = generateNull(n);
+	var G = createGraph(n);
 	// a permutation graph has (v_i, v_j) in E(G) iff i < j and p^1(i) > p^(j)
 	// for some permutation p (perm here represents p^1 since there's no reason to
 	// compute p^-1 since we only use p^-1 so just assume that p^-1 = perm and perm^-1 = p
@@ -198,16 +188,16 @@ function generatePermutationGraph(settings)
 		{
 			if (perm[i] > perm[j])
 			{
-				addEdge(vertices, i, j);
+				addEdge(G, i, j);
 			}
 		}
 	}
-	return vertices;
+	return G;
 }
 
 function generateSplit(settings)
 {
-	var vertices = generateNull(settings.n);
+	var G = createGraph(settings.n);
 	const cliqueSize = 1 + Math.floor(Math.random() * (settings.n - 2));
 	const indepSize = settings.n - cliqueSize;
 	// to figure out which ones should be in the indep set, just take the first cliqueSize of this
@@ -225,17 +215,17 @@ function generateSplit(settings)
 	const crossEdges = Math.floor(Math.random() * (indepSize * cliqueSize));
 	for (var i = 0; i < crossEdges; ++i)
 	{
-		placeRandomEdgeBetween(vertices, U, V);
+		placeRandomEdgeBetween(G, U, V);
 	}
 	// now add edges between vertices of the clique
 	for (var i = 1; i < cliqueSize; ++i)
 	{
 		for (var j = 0; j < i; ++j)
 		{
-			addEdge(vertices, perm[i], perm[j]);
+			addEdge(G, perm[i], perm[j]);
 		}
 	}
-	return vertices;
+	return G;
 }
 
 function randomPermutation(n)
@@ -269,7 +259,7 @@ function generateChordal(settings)
 		settings.n = 31;
 	}
 	const n = settings.n;
-	var vertices = generateNull(n);
+	var G = createGraph(n);
 	// this is not the actual max cliques, but the max cliques at time of adding
 	// this is okay because any time a simplicial vertex is added, the max clique
 	// it forms will be counted for it, so we don't need to think about it for every
@@ -333,7 +323,7 @@ function generateChordal(settings)
 		for (var i = 0; i < simplicialNeighbors.length; ++i)
 		{
 			const v = simplicialNeighbors[i];
-			addEdge(vertices, u, v);
+			addEdge(G, u, v);
 			maxCliques[u].push(v);
 			// update v's knowledge of the size of it's maximal clique if
 			// N[u] is bigger than its previous maximal clique only
@@ -342,5 +332,5 @@ function generateChordal(settings)
 		// so that we can have a canonical form for each clique so we don't consider duplicates
 		maxCliques[u].sort();
 	}
-	return vertices;
+	return G;
 }

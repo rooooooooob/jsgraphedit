@@ -1,48 +1,48 @@
 "use strict";
 
-function dfs(vertices, start)
+function dfs(G, start)
 {
 	var order = [start];
-	var visited = new Array(vertices.length);
-	for (var i = 0; i < vertices.length; ++i)
+	var visited = new Array(G.list.length);
+	for (var i = 0; i < G.list.length; ++i)
 	{
 		visited[i] = false;
 	}
 	visited[start] = true;
 	
-	dfsInternal(vertices, start, order, visited);
+	dfsInternal(G, start, order, visited);
 	
 	return order;
 }
 
-function dfsInternal(vertices, u, order, visited)
+function dfsInternal(G, u, order, visited)
 {
-	for (var i = 0; i < vertices[u].edges.length; ++i)
+	for (var i = 0; i < G.list[u].edges.length; ++i)
 	{
-		const v = vertices[u].edges[i];
+		const v = G.list[u].edges[i];
 		if (!visited[v])
 		{
 			visited[v] = true;
 			order.push(v);
-			dfsInternal(vertices, v, order, visited);
+			dfsInternal(G, v, order, visited);
 		}
 	}
 }
 
-function isConnected(vertices)
+function isConnected(G)
 {
-	return dfs(vertices, 0).length == vertices.length;
+	return dfs(G, 0).length == G.list.length;
 }
 
-function isCut(vertices, u)
+function isCut(G, u)
 {
-	if (vertices[u].edges.length < 2)
+	if (G.list[u].edges.length < 2)
 	{
 		return false;
 	}
 	var order = [u];
-	var visited = new Array(vertices.length);
-	for (var i = 0; i < vertices.length; ++i)
+	var visited = new Array(G.list.length);
+	for (var i = 0; i < G.list.length; ++i)
 	{
 		visited[i] = false;
 	}
@@ -50,56 +50,56 @@ function isCut(vertices, u)
 	
 	// mark u as visited then start dfs at one of its neighbors
 	// which will only visit the entire component if u was non-cut
-	dfsInternal(vertices, vertices[u].edges[0], order, visited);
+	dfsInternal(G, G.list[u].edges[0], order, visited);
 	
-	return dfs(vertices, u).length != order.length;
+	return dfs(G, u).length != order.length;
 }
 
-function countEdges(vertices)
+function countEdges(G)
 {
 	var degsum = 0;
-	for (var i = 0; i < vertices.length; ++i)
+	for (var i = 0; i < G.list.length; ++i)
 	{
-		degsum += vertices[i].edges.length;
+		degsum += G.list[i].edges.length;
 	}
 	return degsum / 2;
 }
 
-function isTree(vertices)
+function isTree(G)
 {
-	return isConnected(vertices) && vertices.length == countEdges(vertices) + 1;
+	return isConnected(G) && G.list.length == countEdges(G) + 1;
 }
 
-function twopathDecompose(vertices)
+function twopathDecompose(G)
 {
 	var paths = [];	
 	// make a copy since this algorithm is destructive
-	var g = cloneGraph(vertices);
+	var H = cloneGraph(G);
 	
 	// keep track of what vertex in g corresponds to what vertex in vertices
 	// so we can return proper indices at the end
-	var gtov = new Array(vertices.length);
-	for (var i = 0; i < vertices.length; ++i)
+	var gtov = new Array(H.list.length);
+	for (var i = 0; i < H.list.length; ++i)
 	{
 		gtov[i] = i;
 	}
 	
-	while (countEdges(g) >= 2)
+	while (countEdges(H) >= 2)
 	{
 		var u = -1;
 		var v = -1
 		var w = -1;
 		var found = false;
 		// two cases -  one there is a non-cut vertex with degree 2 or more
-		for (var i = 0; i < g.length; ++i)
+		for (var i = 0; i < H.list.length; ++i)
 		{
-			if (!isCut(g, i))
+			if (!isCut(H, i))
 			{
-				if (g[i].edges.length >= 2)
+				if (H.list[i].edges.length >= 2)
 				{
-					u = g[i].edges[0];
+					u = H.list[i].edges[0];
 					v = i;
-					w = g[i].edges[1];
+					w = H.list[i].edges[1];
 					found = true;
 					break;
 				}
@@ -119,27 +119,27 @@ function twopathDecompose(vertices)
 			// v is adjacent to at least 2 vertices in this non-end block, and this non-end-block
 			// is a non-separable subgraph, so if they are on a common cycle, so we can easily
 			// remove the edge from v to one of them and use it.
-			for (var i = 0; !found && i < g.length; ++i)
+			for (var i = 0; !found && i < H.list.length; ++i)
 			{
 				// so check for leaves - we know that a v is adjacent to a leaf if it's in
 				// more than 2 components, so try them all
-				if (g[i].edges.length == 1)
+				if (H.list[i].edges.length == 1)
 				{
-					var x = g[i].edges[0];
-					if (g[x].edges.length == 2)
+					var x = H.list[i].edges[0];
+					if (H.list[x].edges.length == 2)
 					{
 						u = i;
 						v = x;
-						w = i == g[x].edges[1] ? g[x].edges[0] : g[x].edges[1];
+						w = i == H.list[x].edges[1] ? H.list[x].edges[0] : H.list[x].edges[1];
 						found = true;
 					}
-					for (var j = 0; !found && j < g[x].edges.length; ++j)
+					for (var j = 0; !found && j < H.list[x].edges.length; ++j)
 					{
-						if (i != g[x].edges[j] && g[g[x].edges[j]].edges.length == 1)
+						if (i != H.list[x].edges[j] && H.list[H.list[x].edges[j]].edges.length == 1)
 						{
 							u = i;
 							v = x;
-							w = g[x].edges[j];
+							w = H.list[x].edges[j];
 							found = true;
 						}
 					}
@@ -149,42 +149,42 @@ function twopathDecompose(vertices)
 			// of its incident edges without alternting the number of components
 			var isolated = 0;
 			var componentSize = -1;
-			for (var i = 0; i < g.length; ++i)
+			for (var i = 0; i < H.list.length; ++i)
 			{
-				if (g[i].edges.length == 0)
+				if (H.list[i].edges.length == 0)
 				{
 					++isolated;
 				}
 				else if (componentSize == -1)
 				{
-					componentSize = dfs(g, i).length;
+					componentSize = dfs(H, i).length;
 				}
 			}
-			if (g.length != isolated + componentSize)
+			if (H.list.length != isolated + componentSize)
 			{
-				alert("g needs to be connected besides isolated vertices - something went wrong");
+				alert("H needs to be connected besides isolated vertices - something went wrong");
 			}
 			if (!found)
 			{
-				for (var i = 0; !found && i < g.length; ++i)
+				for (var i = 0; !found && i < H.list.length; ++i)
 				{
-					if (g[i].edges.length == 1)
+					if (H.list[i].edges.length == 1)
 					{
-						x = g[i].edges[0];
-						for (var j = 0; !found && j < g[x].edges.length; ++j)
+						x = H.list[i].edges[0];
+						for (var j = 0; !found && j < H.list[x].edges.length; ++j)
 						{
-							const y = g[x].edges[j];
+							const y = H.list[x].edges[j];
 							if (i != y)
 							{
-								removeEdge(g, x, y);
-								if (componentSize == dfs(g, x).length)
+								removeEdge(H, x, y);
+								if (componentSize == dfs(H, x).length)
 								{
 									u = i;
 									v = x;
 									w = y;
 									found = true;
 								}
-								addEdge(g, x, y);
+								addEdge(H, x, y);
 							}
 						}
 					}
@@ -203,8 +203,8 @@ function twopathDecompose(vertices)
 		
 		paths.push([[gtov[u], gtov[v]], [gtov[v], gtov[w]]]);
 		
-		removeEdge(g, u, v);
-		removeEdge(g, v, w);
+		removeEdge(H, u, v);
+		removeEdge(H, v, w);
 		// function removeIfIsolated(g, vertex)
 		// {
 			// if (g[vertex].edges.length == 0)
@@ -223,25 +223,25 @@ function twopathDecompose(vertices)
 	return paths;
 }
 
-function isTreeIgnoreIsolatedVertices(vertices)
+function isTreeIgnoreIsolatedVertices(G)
 {
 	var isolated = 0;
 	var lastCheckedComponentSize = 0;
-	for (var i = 0; i < vertices.length; ++i)
+	for (var i = 0; i < G.list.length; ++i)
 	{
-		if (vertices[i].edges.length == 0)
+		if (G.listG.list[i].edges.length == 0)
 		{
 			++isolated;
 		}
 	}
-	for (var i = 0; i < vertices.length; ++i)
+	for (var i = 0; i < G.list.length; ++i)
 	{
-		if (vertices[i].edges.length > 0)
+		if (G.list[i].edges.length > 0)
 		{
-			lastCheckedComponentSize = dfs(vertices, i).length;
+			lastCheckedComponentSize = dfs(G, i).length;
 			break;
 		}
 	}
-	return vertices.length - isolated == lastCheckedComponentSize  // connected (besides isolated)
-	    && vertices.length - isolated == countEdges(vertices) + 1; // right amount of edges for a tree
+	return G.list.length - isolated == lastCheckedComponentSize  // connected (besides isolated)
+	    && G.list.length - isolated == countEdges(G) + 1; // right amount of edges for a tree
 }

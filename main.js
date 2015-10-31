@@ -2,7 +2,7 @@
 
 var canvas;
 var context;
-var vertices = [];
+var G = [];
 const vertexSize = 16;
 var selectedVertex = -1;
 var directed = false;
@@ -51,18 +51,18 @@ function initialise()
 		
 	
 	//readFromList();
-	vertices = generateConnected({n: 13});
-	const m = countEdges(vertices);
+	G = generateConnected({n: 13});
+	const m = countEdges(G);
 	if (m % 2 == 1)
 	{
 		// add or remove an edge - we can keep it connected if it's complete by removing, else add one
-		if (m == vertices.length * (vertices.length - 1) / 2)
+		if (m == G.list.length * (G.list.length - 1) / 2)
 		{
-			removeEdge(vertices, 0, 1);
+			removeEdge(G, 0, 1);
 		}
 		else
 		{
-			placeRandomEdge(vertices);
+			placeRandomEdge(G);
 		}
 	}
 	randomizeVertexPositions();
@@ -76,13 +76,13 @@ function redraw()
 	context.fillStyle = "#DDDDDD";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	// draw edges
-	for (var id = 0; id < vertices.length; ++id)
+	for (var id = 0; id < G.list.length; ++id)
 	{
-		var vertex = vertices[id];
+		var vertex = G.list[id];
 		const neighbors = vertex.edges;
 		for (var i = 0; i < neighbors.length; ++i)
 		{
-			const neighbor = vertices[neighbors[i]];
+			const neighbor = G.list[neighbors[i]];
 			context.beginPath();
 			context.strokeStyle = "#000000";
 			context.lineWidth = 3;
@@ -101,19 +101,19 @@ function redraw()
 			context.beginPath();
 			context.strokeStyle = col;
 			context.lineWidth = 4;
-			context.moveTo(vertices[u].x, vertices[u].y);
-			context.lineTo(vertices[v].x, vertices[v].y);
+			context.moveTo(G.list[u].x, G.list[u].y);
+			context.lineTo(G.list[v].x, G.list[v].y);
 			context.stroke();
 		}
 	}
 	// draw vertices on top
-	for (var id = 0; id < vertices.length; ++id)
+	for (var id = 0; id < G.list.length; ++id)
 	{
-		vertex = vertices[id];
+		vertex = G.list[id];
 		context.beginPath();
 		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
-		if (isCut(vertices, id))
+		if (isCut(G, id))
 			context.fillStyle = (id == selectedVertex ? "#770000" : "#CC0000");
 		context.fill();
 		context.lineWidth = 3;
@@ -130,9 +130,9 @@ function redraw()
 
 function getVertexAt(x, y)
 {
-	for (var id = 0; id < vertices.length; ++id)
+	for (var id = 0; id < G.list.length; ++id)
 	{
-		const vertex = vertices[id];
+		const vertex = G.list[id];
 		const difX = vertex.x - x;
 		const difY = vertex.y - y;
 		if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
@@ -154,10 +154,10 @@ function onMouseClick(event)
 		switch (mode)
 		{
 		case Modes.INSERT:
-			const addedVertex = addVertex(vertices, x, y);
+			const addedVertex = addVertex(G, x, y);
 			if (selectedVertex != -1)
 			{
-				addEdge(vertices, selectedVertex, addedVertex);
+				addEdge(G, selectedVertex, addedVertex);
 			}
 			break;
 		case Modes.REMOVE:
@@ -166,8 +166,8 @@ function onMouseClick(event)
 		case Modes.MOVE:
 			if (selectedVertex != -1)
 			{
-				vertices[selectedVertex].x = x;
-				vertices[selectedVertex].y = y;
+				G.list[selectedVertex].x = x;
+				G.list[selectedVertex].y = y;
 				selectedVertex = -1;
 			}
 			break;
@@ -183,11 +183,11 @@ function onMouseClick(event)
 				switch (mode)
 				{
 				case Modes.INSERT:
-					addEdge(vertices, selectedVertex, vertexClickedOn);
+					addEdge(G, selectedVertex, vertexClickedOn);
 					selectedVertex = vertexClickedOn;
 					break;
 				case Modes.REMOVE:
-					removeEdge(vertices, selectedVertex, vertexClickedOn);
+					removeEdge(G, selectedVertex, vertexClickedOn);
 					break;
 				}
 			}
@@ -195,7 +195,7 @@ function onMouseClick(event)
 			{
 				if (mode == Modes.REMOVE)
 				{
-					removeVertex(vertices, selectedVertex);
+					removeVertex(G, selectedVertex);
 					selectedVertex = -1;
 				}
 				selectedVertex = -1;
@@ -213,7 +213,7 @@ function onMouseClick(event)
 
 function readFromList()
 {
-	vertices = []
+	G = []
 	var inputs = document.getElementById("adj_list_textbox_id").value.match(/\S+/g).map(function(str) { return parseInt(str, 10) });
 	const badIndex = inputs.indexOf(NaN);
 	if (badIndex != -1)
@@ -223,7 +223,7 @@ function readFromList()
 	}
 	for (var i = 0; i < inputs[0]; ++i)
 	{
-		addVertex(vertices, Math.random() * canvas.width, Math.random() * canvas.height);
+		addVertex(G, Math.random() * canvas.width, Math.random() * canvas.height);
 	}
 	var currentVertex = 0;
 	var index = 1;
@@ -233,7 +233,7 @@ function readFromList()
 		const degree = inputs[index++];
 		for (var j = 0; j < degree; ++j)
 		{
-			addEdge(vertices, currentVertex, inputs[index++]);
+			addEdge(G, currentVertex, inputs[index++]);
 		}
 		++currentVertex;
 	}
@@ -243,13 +243,13 @@ function readFromList()
 
 function exportToList()
 {
-	var output = vertices.length + "\n";
-	for (var i = 0; i < vertices.length; ++i)
+	var output = G.list.length + "\n";
+	for (var i = 0; i < G.list.length; ++i)
 	{
-		output += " " + vertices[i].edges.length;
-		for (var j = 0; j < vertices[i].edges.length; ++j)
+		output += " " + G.list[i].edges.length;
+		for (var j = 0; j < G.list[i].edges.length; ++j)
 		{
-			output += " " + vertices[i].edges[j];
+			output += " " + G.list[i].edges[j];
 		}
 		output += "\n";
 	}
@@ -275,7 +275,7 @@ function importPrufer()
 	}
 	if (!failed)
 	{
-		vertices = fromPrufer(seq);
+		G = fromPrufer(seq);
 		
 		edgeHighlights = {};
 		
@@ -287,9 +287,9 @@ function importPrufer()
 
 function exportPrufer()
 {
-	if (require(vertices, [satisfyTree]))
+	if (require(G, [satisfyTree]))
 	{
-		document.getElementById("prufer_textbox_id").value = toPrufer(vertices).join(" ");
+		document.getElementById("prufer_textbox_id").value = toPrufer(G).join(" ");
 	}
 }
 
@@ -297,12 +297,12 @@ function runTwopathDecomp()
 {
 	var evenSize = {
 		str : "even size",
-		func : function(vertices) { return countEdges(vertices) % 2 == 0; }
+		func : function(G) { return countEdges(G) % 2 == 0; }
 	};
-	if (require(vertices, [satisfyConnected, evenSize]))
+	if (require(G, [satisfyConnected, evenSize]))
 	{
 		edgeHighlights = {};
-		var twopaths = twopathDecompose(vertices);
+		var twopaths = twopathDecompose(G);
 		for (var i = 0; i < twopaths.length; ++i)
 		{
 			const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
@@ -329,7 +329,7 @@ function menuGenerate(genFunc, settings, conditions)
 		var settings = settings || {};	
 		settings.n = n;
 	
-		vertices = genFunc(settings);
+		G = genFunc(settings);
 		
 		edgeHighlights = {};
 
@@ -343,12 +343,12 @@ function menuGenerate(genFunc, settings, conditions)
 	}
 }
 
-function require(vertices, conditions)
+function require(G, conditions)
 {
 	var failed = [];
 	for (var i = 0; i < conditions.length; ++i)
 	{
-		if (!conditions[i].func(vertices))
+		if (!conditions[i].func(G))
 		{
 			failed.push(conditions[i].str);
 		}
@@ -417,9 +417,9 @@ function setModeToMove()
 
 function randomizeVertexPositions()
 {
-	for (var u = 0; u < vertices.length; ++u)
+	for (var u = 0; u < G.list.length; ++u)
 	{
-		vertices[u].x = Math.random() * canvas.width;
-		vertices[u].y = Math.random() * canvas.height;
+		G.list[u].x = Math.random() * canvas.width;
+		G.list[u].y = Math.random() * canvas.height;
 	}
 }
