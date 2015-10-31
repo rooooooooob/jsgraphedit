@@ -304,11 +304,6 @@ function generateChordal(settings)
 				{
 					if (clique & (1 << i))
 					{
-						console.log("adding v = " + chosenCliqueGroup[i]);
-						if (chosenCliqueGroup[i] == undefined)
-						{
-							console.log("uh oh");
-						}
 						simplicialNeighbors.push(chosenCliqueGroup[i]);
 					}
 				}
