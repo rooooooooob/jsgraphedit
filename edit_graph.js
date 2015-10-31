@@ -80,17 +80,18 @@ function addVertex(G, x, y)
 function cloneGraph(G)
 {
 	var newVertices = new Array(G.list.length);
+	var newPos = new Array(G.pos.length);
 	for (var i = 0; i < G.list.length; ++i)
 	{
-		newVertices[i] = {
-			x : G.list[i].x,
-			y : G.list[i].y,
-			edges : new Array(G.list[i].length)
-		}
+		newVertices[i] = new Array(G.list[i].length);
 		for (var j = 0; j < G.list[i].length; ++j)
 		{
 			newVertices[i][j] = G.list[i][j];
 		}
+		newPos[i] = {
+			x : G.list[i].x,
+			y : G.list[i].y
+		};
 	}
 	return {
 		list : newVertices,
