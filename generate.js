@@ -256,7 +256,7 @@ function randomPermutation(n)
 }
 
 
-function randomChordal(n)
+function generateChordal(settings)
 {
 	// this algorithm works by starting with K_1 and slowly building up the graph by adding
 	// in simplicial vertices to existing cliques in the graph
@@ -264,13 +264,14 @@ function randomChordal(n)
 	// and we can just pick one of these at random and then pick a subset of these at random
 	// to effectively find a clique in G to attach the simplicial vertex to in linear time
 	// @todo pool all max cliques into a set so that we don't consider duplicates
+	const n = settings.n;
 	var vertices = generateNull(n);
 	var maxCliques = [[0]];
 	var totalCliques = 1;
 	for (var u = 1; u < n; ++u)
 	{
 		// pick a clique at random
-		var clique = Math.random(totalCliques);
+		var clique = Math.floor(Math.random(totalCliques));
 		var maxCliqueIndex = 0;
 		// @todo make this work with over 32 
 		if (totalCliques >= (1 << 30)) alert("too many vertices - limit is 31 (this will be fixed later)");
@@ -282,10 +283,11 @@ function randomChordal(n)
 			clique -= subCliques;
 			++maxCliqueIndex;
 		}
+		maxCliques.push([u]);
 		var simplicialNeighbors = [];
 		for (var i = 0; i < 31; ++i)
 		{
-			if (clique & (1 << i))
+			if ((clique + 1) & (1 << i))
 			{
 				simplicialNeighbors.push(maxCliques[maxCliqueIndex][i]);
 			}
@@ -293,9 +295,9 @@ function randomChordal(n)
 		for (var i = 0; i < simplicialNeighbors.length; ++i)
 		{
 			const v = simplicialNeighbors[i];
-			addEdge(u, v);
+			maxCliques[u].push(v);
+			addEdge(vertices, u, v);
 			totalCliques += simplicialNeighbors.length;
-			maxCliques[v].push(a);
 		}
 		//uncomment when I remove duplicate max cliques
 		//totalCliques += simplicialNeighbors.length // all cliques from a subset of N(u) as well as u

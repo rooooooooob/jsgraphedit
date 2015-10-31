@@ -390,6 +390,11 @@ function menuGenerateSplit()
 	menuGenerate(generateSplit);
 }
 
+function menuGenerateChordal()
+{
+	menuGenerate(generateChordal);
+}
+
 function setMode(newMode)
 {
 	mode = newMode;
