@@ -276,10 +276,15 @@ function generateChordal(settings)
 		var totalCliques = 0;
 		for (var maximalClique in uniqueMaxCliques)
 		{
-			totalCliques += uniqueMaxCliques[maximalClique];
+			// this is not good since even between 2 unique maximal cliques
+			// ie {0, 1, 2} and {1, 2, 3, 4} the sub-clique {1, 2} is repeated twice
+			// but whatever, it's good enough I guess...
+			const k = uniqueMaxCliques[maximalClique].length;
+			totalCliques += (1 << k) - 1;
 		}
-		// pick a clique at random
-		var clique = Math.floor(Math.random() * totalCliques);
+		// pick a clique at random (the + 1 is so we are in the range [0, totalCliques]
+		// since we use this value later as a bitset and 0 would mean no vertices chosen
+		var clique = Math.floor(Math.random() * totalCliques) + 1;
 		// @todo make this work with over 32 
 		if (totalCliques >= (1 << 30)) alert("too many vertices - limit is 31 (this will be fixed later)");
 		var simplicialNeighbors = [];
@@ -289,11 +294,15 @@ function generateChordal(settings)
 			// non-empty cliques of an n-clique, which is (1 << n )- 1
 			const chosenCliqueGroup = uniqueMaxCliques[maximalClique];
 			const subCliques = (1 <<chosenCliqueGroup.length) - 1;
+			if (clique < 0)
+			{
+				break;
+			}
 			if (clique <= subCliques)
 			{
 				for (var i = 0; i < n; ++i)
 				{
-					if ((clique + 1) & (1 << i))
+					if (clique & (1 << i))
 					{
 						console.log("adding v = " + chosenCliqueGroup[i]);
 						if (chosenCliqueGroup[i] == undefined)
@@ -312,13 +321,9 @@ function generateChordal(settings)
 			const v = simplicialNeighbors[i];
 			maxCliques[u].push(v);
 			addEdge(vertices, u, v);
-			totalCliques += simplicialNeighbors.length;
 		}
 		// so that we can have a canonical form for each clique so we don't consider duplicates
 		maxCliques[u].sort();
-		//uncomment when I remove duplicate max cliques
-		//totalCliques += simplicialNeighbors.length // all cliques from a subset of N(u) as well as u
-		totalCliques += 1; // the clique {u}
 	}
 	return vertices;
 }
