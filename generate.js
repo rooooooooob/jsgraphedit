@@ -73,7 +73,7 @@ function toPrufer(G)
 	for (var i = 0; i < remaining.length; ++i)
 	{
 		remaining[i] = i;
-		degrees[i] = G.list[i].edges.length;
+		degrees[i] = G.list[i].length;
 	}
 	var minleaf;
 	
@@ -88,7 +88,7 @@ function toPrufer(G)
 			}
 		}
 		var stem = -1;
-		const neighbors = G.list[remaining[minleaf]].edges;
+		const neighbors = G.list[remaining[minleaf]];
 		for (var j = 0; stem == -1 && j < neighbors.length; ++j)
 		{
 			for (var k = 0; stem == -1 && k < remaining.length - i; ++k)
@@ -134,7 +134,7 @@ function placeRandomEdge(G)
 			u = Math.floor(Math.random() * G.list.length);
 			v = Math.floor(Math.random() * G.list.length);
 		}
-		while (u == v || G.list[u].edges.indexOf(v) != -1 || G.list[v].edges.indexOf(u) != -1)
+		while (u == v || G.list[u].indexOf(v) != -1 || G.list[v].indexOf(u) != -1)
 		addEdge(G, u, v);
 	}
 }
@@ -150,7 +150,7 @@ function placeRandomEdgeBetween(G, U, V)
 			u = U[Math.floor(Math.random() * U.length)];
 			v = V[Math.floor(Math.random() * V.length)];
 		}
-		while (G.list[u].edges.indexOf(v) != -1 || G.list[v].edges.indexOf(u) != -1)
+		while (G.list[u].indexOf(v) != -1 || G.list[v].indexOf(u) != -1)
 		addEdge(G, u, v);
 	}
 }

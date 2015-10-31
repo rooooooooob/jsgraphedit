@@ -78,16 +78,14 @@ function redraw()
 	// draw edges
 	for (var id = 0; id < G.list.length; ++id)
 	{
-		var vertex = G.list[id];
-		const neighbors = vertex.edges;
+		const neighbors = G.list[id];
 		for (var i = 0; i < neighbors.length; ++i)
 		{
-			const neighbor = G.list[neighbors[i]];
 			context.beginPath();
 			context.strokeStyle = "#000000";
 			context.lineWidth = 3;
-			context.moveTo(vertex.x, vertex.y);
-			context.lineTo(neighbor.x, neighbor.y);
+			context.moveTo(G.pos[id].x, G.pos[id].y);
+			context.lineTo(G.pos[neighbors[i]].x, G.pos[neighbors[i]].y);
 			context.stroke();
 		}
 	}
@@ -101,17 +99,16 @@ function redraw()
 			context.beginPath();
 			context.strokeStyle = col;
 			context.lineWidth = 4;
-			context.moveTo(G.list[u].x, G.list[u].y);
-			context.lineTo(G.list[v].x, G.list[v].y);
+			context.moveTo(G.pos[u].x, G.pos[u].y);
+			context.lineTo(G.pos[v].x, G.pos[v].y);
 			context.stroke();
 		}
 	}
 	// draw vertices on top
-	for (var id = 0; id < G.list.length; ++id)
+	for (var id = 0; id < G.pos.length; ++id)
 	{
-		vertex = G.list[id];
 		context.beginPath();
-		context.arc(vertex.x, vertex.y, vertexSize, 0, 2*Math.PI);
+		context.arc(G.pos[id].x, G.pos[id].y, vertexSize, 0, 2*Math.PI);
 		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
 		if (isCut(G, id))
 			context.fillStyle = (id == selectedVertex ? "#770000" : "#CC0000");
@@ -124,7 +121,7 @@ function redraw()
 		context.textAlign = "center";
 		context.textBaseline = "middle";
 		context.fillStyle = "#000000";
-		context.fillText(id, vertex.x, vertex.y);
+		context.fillText(id, G.pos[id].x, G.pos[id].y);
 	}
 }
 
@@ -132,9 +129,8 @@ function getVertexAt(x, y)
 {
 	for (var id = 0; id < G.list.length; ++id)
 	{
-		const vertex = G.list[id];
-		const difX = vertex.x - x;
-		const difY = vertex.y - y;
+		const difX = G.pos[id].x - x;
+		const difY = G.pos[id].y - y;
 		if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
 		{
 			return id;
@@ -166,8 +162,8 @@ function onMouseClick(event)
 		case Modes.MOVE:
 			if (selectedVertex != -1)
 			{
-				G.list[selectedVertex].x = x;
-				G.list[selectedVertex].y = y;
+				G.pos[selectedVertex].x = x;
+				G.pos[selectedVertex].y = y;
 				selectedVertex = -1;
 			}
 			break;
@@ -246,10 +242,10 @@ function exportToList()
 	var output = G.list.length + "\n";
 	for (var i = 0; i < G.list.length; ++i)
 	{
-		output += " " + G.list[i].edges.length;
-		for (var j = 0; j < G.list[i].edges.length; ++j)
+		output += " " + G.list[i].length;
+		for (var j = 0; j < G.list[i].length; ++j)
 		{
-			output += " " + G.list[i].edges[j];
+			output += " " + G.list[i][j];
 		}
 		output += "\n";
 	}
@@ -419,7 +415,7 @@ function randomizeVertexPositions()
 {
 	for (var u = 0; u < G.list.length; ++u)
 	{
-		G.list[u].x = Math.random() * canvas.width;
-		G.list[u].y = Math.random() * canvas.height;
+		G.pos[u].x = Math.random() * canvas.width;
+		G.pos[u].y = Math.random() * canvas.height;
 	}
 }
