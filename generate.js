@@ -263,15 +263,34 @@ function generateChordal(settings)
 	// this works well since there are a linear amount of maximal cliques in a chordal graph
 	// and we can just pick one of these at random and then pick a subset of these at random
 	// to effectively find a clique in G to attach the simplicial vertex to in linear time
+	if (settings.n > 31)
+	{
+		alert("Doesn't work for n > 31 right now - setting n = 31. I will make it work on bigger n later.");
+		settings.n = 31;
+	}
 	const n = settings.n;
 	var vertices = generateNull(n);
+	// this is not the actual max cliques, but the max cliques at time of adding
+	// this is okay because any time a simplicial vertex is added, the max clique
+	// it forms will be counted for it, so we don't need to think about it for every
+	// other vertex. maxCliqueSize however keeps track of the max clique a vertex
+	// is in, so that we know maxCliques[v] is only valid if maxCliques[v].length
+	// is the same as maxCliqueSize[v]
 	var maxCliques = [[0]];
+	var maxCliqueSize = new Array(n);
+	// every vertex v has {v} as a clique
+	maxCliqueSize.fill(1);
 	for (var u = 1; u < n; ++u)
 	{
 		var uniqueMaxCliques = {};
 		for (var i = 0; i < u; ++i)
 		{
-			uniqueMaxCliques[maxCliques[i].toString()] = maxCliques[i];
+			// as explained in the above comment, maxCliques[v] is only valid if
+			// maxCliqueSize[v] == maxCliques[v].length
+			if (maxCliqueSize[i] == maxCliques[i].length)
+			{
+				uniqueMaxCliques[maxCliques[i].toString()] = maxCliques[i];
+			}
 		}
 		var totalCliques = 0;
 		for (var maximalClique in uniqueMaxCliques)
@@ -286,7 +305,6 @@ function generateChordal(settings)
 		// since we use this value later as a bitset and 0 would mean no vertices chosen
 		var clique = Math.floor(Math.random() * totalCliques) + 1;
 		// @todo make this work with over 32 
-		if (totalCliques >= (1 << 30)) alert("too many vertices - limit is 31 (this will be fixed later)");
 		var simplicialNeighbors = [];
 		for (var maximalClique in uniqueMaxCliques)
 		{
@@ -311,11 +329,15 @@ function generateChordal(settings)
 			clique -= subCliques;
 		}
 		maxCliques.push([u]);
+		maxCliqueSize[u] = simplicialNeighbors.length + 1;
 		for (var i = 0; i < simplicialNeighbors.length; ++i)
 		{
 			const v = simplicialNeighbors[i];
-			maxCliques[u].push(v);
 			addEdge(vertices, u, v);
+			maxCliques[u].push(v);
+			// update v's knowledge of the size of it's maximal clique if
+			// N[u] is bigger than its previous maximal clique only
+			maxCliqueSize[v] = Math.max(maxCliqueSize[v], maxCliqueSize[u]);
 		}
 		// so that we can have a canonical form for each clique so we don't consider duplicates
 		maxCliques[u].sort();
