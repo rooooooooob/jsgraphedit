@@ -6,6 +6,7 @@ function removeArc(G, u, v)
 	const vindex = neighbors.indexOf(v);
 	neighbors[vindex] = neighbors[neighbors.length - 1];
 	neighbors.pop();
+	G.matrix[u][v] = -1;
 }
 
 function createGraph(n)
@@ -32,11 +33,17 @@ function removeEdge(G, u, v)
 function removeVertex(G, id)
 {
 	const lastID = G.list.length - 1;
-	for (var property in G.list[id])
-	{
-		G.list[id][property] = G.list[lastID][property];
-	}
+	G.list[id] = G.list[lastID];
+	G.matrix[id] = G.matrix[lastID];
+	G.pos[id] = G.pos[lastID];
+	G.matrix.pop();
 	G.list.pop();
+	G.pos.pop();
+	for (var i = 0; i < G.matrix.length; ++i)
+	{
+		G.matrix[i][id] = G.matrix[i][lastID];
+		G.matrix[i].pop();
+	}
 	for (var vid = 0; vid < G.list.length; ++vid)
 	{
 		const neighbors = G.list[vid];
@@ -64,8 +71,9 @@ function addEdge(G, u, v)
 
 function addArc(G, u, v)
 {
-	if (G.list[u].indexOf(v) == -1)
+	if (G.matrix[u][v] == -1)
 	{
+		G.matrix[u][v]
 		G.list[u].push(v);
 	}
 }
@@ -74,6 +82,12 @@ function addVertex(G, x, y)
 {
 	G.list.push([]);
 	G.pos.push({x:x, y:y});
+	G.matrix.push(new Array(G.list.length));
+	G.matrix[G.list.length - 1].fill(-1);
+	for (var i = 0; i < G.list.length - 1; ++i)
+	{
+		G.matrix[i].push(-1);
+	}
 	return G.list.length - 1;
 }
 
@@ -93,8 +107,14 @@ function cloneGraph(G)
 			y : G.list[i].y
 		};
 	}
+	var newMatrix = new Array(G.matrix.length);
+	for (var i = 0; i < G.matrix.length; ++i)
+	{
+		newMatrix[i] = G.matrix[i].slice();
+	}
 	return {
 		list : newVertices,
-		matrix : [[]]
+		matrix : newMatrix,
+		pos : newPos
 	};
 }
