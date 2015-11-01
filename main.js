@@ -360,7 +360,7 @@ function require(G, conditions)
 	{
 		alert("Graph must satisfy: " + failed.join(", "));
 	}
-	return true;
+	return failed.length == 0;
 }
 
 function menuGenerateTree()
