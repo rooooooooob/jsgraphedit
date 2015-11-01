@@ -316,6 +316,13 @@ function runTwopathDecomp()
 	}
 }
 
+function runComplement()
+{
+	edgeHighlights = {};
+	G = complement(G);
+	redraw();
+}
+
 function menuGenerate(genFunc, settings, conditions)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)

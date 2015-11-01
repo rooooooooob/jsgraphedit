@@ -1,5 +1,27 @@
 "use strict";
 
+function complement(G)
+{
+	var H = cloneGraph(G);
+	const n = H.matrix.length;
+	for (var i = 0; i < n; ++i)
+	{
+		for (var j = 0; j < n; ++j)
+		{
+			if (H.matrix[i][j] == -1)
+			{
+				H.matrix[i][j] = 1;
+			}
+			else
+			{
+				H.matrix[i][j] = -1;
+			}
+		}
+	}
+	setListFromMatrix(H);
+	return H;
+}
+
 function generateConnected(settings)
 {
 	// create a spanning tree

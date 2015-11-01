@@ -63,6 +63,22 @@ function removeVertex(G, id)
 	return lastID;
 }
 
+function setListFromMatrix(G)
+{
+	const n = G.matrix.length;
+	for (var i = 0; i < n; ++i)
+	{
+		G.list[i] = [];
+		for (var j = 0; j < n; ++j)
+		{
+			if (G.matrix[i][j] != -1)
+			{
+				G.list[i].push(j);
+			}
+		}
+	}
+}
+
 function addEdge(G, u, v)
 {
 	addArc(G, u, v);
@@ -73,7 +89,7 @@ function addArc(G, u, v)
 {
 	if (G.matrix[u][v] == -1)
 	{
-		G.matrix[u][v]
+		G.matrix[u][v] = 1;
 		G.list[u].push(v);
 	}
 }
@@ -103,8 +119,8 @@ function cloneGraph(G)
 			newVertices[i][j] = G.list[i][j];
 		}
 		newPos[i] = {
-			x : G.list[i].x,
-			y : G.list[i].y
+			x : G.pos[i].x,
+			y : G.pos[i].y
 		};
 	}
 	var newMatrix = new Array(G.matrix.length);
