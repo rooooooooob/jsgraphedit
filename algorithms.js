@@ -1,8 +1,21 @@
 "use strict";
 
-function dfs(G, start)
+function destinationOnly(u, v)
 {
-	var order = [start];
+	return v;
+}
+
+function wholeEdge(u , v)
+{
+	if (u == null)
+		return null;
+	return [u, v];
+}
+
+function dfs(G, start, processEdge = destinationOnly)
+{
+	var processedRoot = processEdge(null, start);
+	var order = processedRoot == null ? [] : [processedRoot];
 	var visited = new Array(G.list.length);
 	for (var i = 0; i < G.list.length; ++i)
 	{
@@ -10,12 +23,12 @@ function dfs(G, start)
 	}
 	visited[start] = true;
 	
-	dfsInternal(G, start, order, visited);
+	dfsInternal(G, start, order, visited, processEdge);
 	
 	return order;
 }
 
-function dfsInternal(G, u, order, visited)
+function dfsInternal(G, u, order, visited, processEdge)
 {
 	for (var i = 0; i < G.list[u].length; ++i)
 	{
@@ -23,8 +36,15 @@ function dfsInternal(G, u, order, visited)
 		if (!visited[v])
 		{
 			visited[v] = true;
-			order.push(v);
-			dfsInternal(G, v, order, visited);
+			if (processEdge)
+			{
+				const e = processEdge(v)
+				if (e != null)
+				{
+					order.push();
+				}
+			}
+			dfsInternal(G, v, order, visited, processEdge);
 		}
 	}
 }
@@ -50,7 +70,7 @@ function isCut(G, u)
 	
 	// mark u as visited then start dfs at one of its neighbors
 	// which will only visit the entire component if u was non-cut
-	dfsInternal(G, G.list[u][0], order, visited);
+	dfsInternal(G, G.list[u][0], order, visited, destinationOnly);
 	
 	return dfs(G, u).length != order.length;
 }
