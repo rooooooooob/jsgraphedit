@@ -7,15 +7,12 @@ function destinationOnly(u, v)
 
 function wholeEdge(u , v)
 {
-	if (u == null)
-		return null;
 	return [u, v];
 }
 
 function dfs(G, start, processEdge = destinationOnly)
 {
-	var processedRoot = processEdge(null, start);
-	var order = processedRoot == null ? [] : [processedRoot];
+	var order = [processEdge(null, start)];
 	var visited = new Array(G.list.length);
 	for (var i = 0; i < G.list.length; ++i)
 	{
@@ -38,11 +35,7 @@ function dfsInternal(G, u, order, visited, processEdge)
 			visited[v] = true;
 			if (processEdge)
 			{
-				const e = processEdge(v)
-				if (e != null)
-				{
-					order.push();
-				}
+				order.push(processEdge(u, v));
 			}
 			dfsInternal(G, v, order, visited, processEdge);
 		}
