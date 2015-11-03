@@ -3,7 +3,7 @@ var CircularQueue = function(n)
 	this.buffer = new Array(n);
 	this.nextIndex = 0;
 	this.front = 0;
-}
+};
 
 CircularQueue.prototype.push = function(e)
 {
@@ -12,7 +12,7 @@ CircularQueue.prototype.push = function(e)
 		alert("implement expansion later");
 	}
 	this.buffer[this.nextIndex++] = e;
-}
+};
 
 CircularQueue.prototype.pop = function()
 {
@@ -20,12 +20,12 @@ CircularQueue.prototype.pop = function()
 	this.buffer[this.front] = null;
 	this.front = (this.front + 1) % this.buffer.length;
 	return ret;
-}
+};
 
 CircularQueue.prototype.length = function()
 {
 	return (this.nextIndex + this.buffer.length - this.front) % this.buffer.length;
-}
+};
 
 CircularQueue.prototype.toString = function()
 {
@@ -40,4 +40,4 @@ CircularQueue.prototype.toString = function()
 		ret += this.buffer[(this.front + i) % this.buffer.length];
 	}
 	return ret + "]";
-}
+};
