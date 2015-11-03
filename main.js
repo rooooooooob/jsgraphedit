@@ -339,10 +339,14 @@ function runBFS()
 			{
 				edgeHighlights[key] = [];
 			}
-			for (var j = 1; j < bfsTree.length; ++j)
+			for (var j = 0; j < bfsTree.length; ++j)
 			{
 				visited[bfsTree[j][1]] = true;
-				edgeHighlights[key].push([bfsTree[j][0], bfsTree[j][1]]);
+				// don't draw first edge, since it's [null, start]
+				if (j > 0)
+				{
+					edgeHighlights[key].push(bfsTree[j]);
+				}
 			}
 		}
 	}
