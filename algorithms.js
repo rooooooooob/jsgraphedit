@@ -14,10 +14,7 @@ function dfs(G, start, processEdge = destinationOnly)
 {
 	var order = [processEdge(null, start)];
 	var visited = new Array(G.list.length);
-	for (var i = 0; i < G.list.length; ++i)
-	{
-		visited[i] = false;
-	}
+	visited.fill(false);
 	visited[start] = true;
 	
 	dfsInternal(G, start, order, visited, processEdge);
@@ -33,13 +30,38 @@ function dfsInternal(G, u, order, visited, processEdge)
 		if (!visited[v])
 		{
 			visited[v] = true;
-			if (processEdge)
-			{
-				order.push(processEdge(u, v));
-			}
+			order.push(processEdge(u, v));
 			dfsInternal(G, v, order, visited, processEdge);
 		}
 	}
+}
+
+function bfs(G, start, processEdge = destinationOnly)
+{
+	var order = [];
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	var queue = new CircularQueue(G.list.length);
+	function visit(u, v)
+	{
+		queue.push(v);
+		visited[v] = true;
+		order.push(processEdge(u, v));
+	}
+	visit(null, start);
+	while (queue.length() > 0)
+	{
+		const u = queue.pop();
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const v = G.list[u][i];
+			if (!visited[v])
+			{
+				visit(u, v);
+			}
+		}
+	}
+	return order;
 }
 
 function isConnected(G)

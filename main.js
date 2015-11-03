@@ -302,12 +302,12 @@ function runTwopathDecomp()
 		for (var i = 0; i < twopaths.length; ++i)
 		{
 			const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
 			for (var j = 0; j < twopaths[i].length; ++j)
 			{
-				if (!edgeHighlights[key])
-				{
-					edgeHighlights[key] = [];
-				}
 				edgeHighlights[key].push(twopaths[i][j]);
 			}
 		}
@@ -320,6 +320,33 @@ function runComplement()
 {
 	edgeHighlights = {};
 	G = complement(G);
+	redraw();
+}
+
+function runBFS()
+{
+	edgeHighlights = {};
+	
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	for (var i = 0; i < G.list.length; ++i)
+	{
+		if (!visited[i])
+		{
+			const bfsTree = bfs(G, i, wholeEdge);
+			const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
+			for (var j = 1; j < bfsTree.length; ++j)
+			{
+				visited[bfsTree[j][1]] = true;
+				edgeHighlights[key].push([bfsTree[j][0], bfsTree[j][1]]);
+			}
+		}
+	}
+	
 	redraw();
 }
 
