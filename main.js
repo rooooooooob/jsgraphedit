@@ -36,6 +36,10 @@ var satisfyTree;
 
 function initialise()
 {
+	var q = new CircularQueue(4);
+	for (var i = 0; i < 11; ++i)
+		q.push(i);
+	alert(q.toString());
 	canvas = document.getElementById("myCanvas");
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
