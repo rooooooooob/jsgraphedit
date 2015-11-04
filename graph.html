@@ -60,13 +60,16 @@
 	
 	<br>Random Generation:
 	n: <input id="gen_vertices_id" type="number" min="0" style="width: 64px;" value="9">
-	<button onClick="menuGenerateTree()">Tree</button>
-	<button onClick="menuGenerateConnected()">Connected</button>
-	<button onClick="menuGenerateComplete()">Complete</button>
-	<button onClick="menuGenerateHamiltonian()">Hamiltonian</button>
-	<button onClick="menuGeneratePermutationGraph()">Permutation</button>
-	<button onClick="menuGenerateSplit()">Split</button>
-	<button onClick="menuGenerateChordal()">Chordal</button>
+	<select id="menu_generate_select_id">
+		<option value="tree">Tree</option>
+		<option value="connected">Connected</option>
+		<option value="complete">Complete</option>
+		<option value="hamiltonian">Hamiltonian</option>
+		<option value="permutation">Permutation</option>
+		<option value="split">Split</option>
+		<option value="chordal">Chordal</option>
+	</select>
+	<button onClick="menuGenerateClicked()">Generate</button>
 	
 	<hr>
 	

@@ -36,10 +36,6 @@ var satisfyTree;
 
 function initialise()
 {
-	var q = new CircularQueue(4);
-	for (var i = 0; i < 11; ++i)
-		q.push(i);
-	alert(q.toString());
 	canvas = document.getElementById("myCanvas");
 	context = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseClick, false);
@@ -398,39 +394,33 @@ function require(G, conditions)
 	return failed.length == 0;
 }
 
-function menuGenerateTree()
+function menuGenerateClicked()
 {
-	menuGenerate(generateTree);
-}
-
-function menuGenerateConnected()
-{
-	menuGenerate(generateConnected);
-}
-
-function menuGenerateComplete()
-{
-	menuGenerate(generateComplete);
-}
-
-function menuGenerateHamiltonian()
-{
-	menuGenerate(generateHamiltonian);
-}
-
-function menuGeneratePermutationGraph()
-{
-	menuGenerate(generatePermutationGraph);
-}
-
-function menuGenerateSplit()
-{
-	menuGenerate(generateSplit);
-}
-
-function menuGenerateChordal()
-{
-	menuGenerate(generateChordal);
+	var type = document.getElementById("menu_generate_select_id");
+	switch (type.options[type.selectedIndex].value)
+	{
+		case "tree":
+			menuGenerate(generateTree);
+			break;
+		case "connected":
+			menuGenerate(generateConnected);
+			break;
+		case "complete":
+			menuGenerate(generateComplete);
+			break;
+		case "hamiltonian":
+			menuGenerate(generateHamiltonian);
+			break;
+		case "permutation":
+			menuGenerate(generatePermutationGraph);
+			break;
+		case "split":
+			menuGenerate(generateSplit);
+			break;
+		case "chordal":
+			menuGenerate(generateChordal);
+			break;
+	}
 }
 
 function setMode(newMode)
