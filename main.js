@@ -354,7 +354,7 @@ function runBFS()
 	redraw();
 }
 
-function menuGenerate(genFunc, settings, conditions)
+function menuGenerate(genFunc, settings)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)
 
@@ -419,6 +419,36 @@ function menuGenerateClicked()
 			break;
 		case "chordal":
 			menuGenerate(generateChordal);
+			break;
+	}
+}
+
+function menuGenerateChanged()
+{
+	var helpURL = document.getElementById("menu_generate_info_id");
+	var type = document.getElementById("menu_generate_select_id");
+	switch (type.options[type.selectedIndex].value)
+	{
+		case "tree":
+			helpURL.href = "https://en.wikipedia.org/wiki/Tree_%28graph_theory%29";
+			break;
+		case "connected":
+			helpURL.href = "https://en.wikipedia.org/wiki/Connectivity_%28graph_theory%29#Connected_graph";
+			break;
+		case "complete":
+			helpURL.href = "https://en.wikipedia.org/wiki/Complete_graph";
+			break;
+		case "hamiltonian":
+			helpURL.href = "https://en.wikipedia.org/wiki/Hamiltonian_path";
+			break;
+		case "permutation":
+			helpURL.href = "https://en.wikipedia.org/wiki/Permutation_graph";
+			break;
+		case "split":
+			helpURL.href = "https://en.wikipedia.org/wiki/Split_graph";
+			break;
+		case "chordal":
+			helpURL.href = "https://en.wikipedia.org/wiki/Chordal_graph";
 			break;
 	}
 }

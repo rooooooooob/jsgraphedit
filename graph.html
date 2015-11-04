@@ -60,15 +60,16 @@
 	
 	<br>Random Generation:
 	n: <input id="gen_vertices_id" type="number" min="0" style="width: 64px;" value="9">
-	<select id="menu_generate_select_id">
+	<select id="menu_generate_select_id" onChange="menuGenerateChanged()">
+		<option value="chordal">Chordal</option>
 		<option value="tree">Tree</option>
 		<option value="connected">Connected</option>
+		<option value="permutation">Permutation</option>
 		<option value="complete">Complete</option>
 		<option value="hamiltonian">Hamiltonian</option>
-		<option value="permutation">Permutation</option>
 		<option value="split">Split</option>
-		<option value="chordal">Chordal</option>
 	</select>
+	<a id="menu_generate_info_id" href="https://en.wikipedia.org/wiki/Chordal_graph">[?]</a>
 	<button onClick="menuGenerateClicked()">Generate</button>
 	
 	<hr>
