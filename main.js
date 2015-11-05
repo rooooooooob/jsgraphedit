@@ -209,7 +209,7 @@ function onMouseClick(event)
 
 function readFromList()
 {
-	G = []
+	G = createGraph(0);
 	var inputs = document.getElementById("adj_list_textbox_id").value.match(/\S+/g).map(function(str) { return parseInt(str, 10) });
 	const badIndex = inputs.indexOf(NaN);
 	if (badIndex != -1)
@@ -242,7 +242,7 @@ function exportToList()
 	var output = G.list.length + "\n";
 	for (var i = 0; i < G.list.length; ++i)
 	{
-		output += " " + G.list[i].length;
+		output += G.list[i].length;
 		for (var j = 0; j < G.list[i].length; ++j)
 		{
 			output += " " + G.list[i][j];
