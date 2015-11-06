@@ -8,7 +8,7 @@ function complement(G)
 	{
 		for (var j = 0; j < n; ++j)
 		{
-			if (H.matrix[i][j] == -1)
+			if (i != j && H.matrix[i][j] == -1)
 			{
 				H.matrix[i][j] = 1;
 			}
