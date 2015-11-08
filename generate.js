@@ -217,6 +217,23 @@ function generatePermutationGraph(settings)
 	return G;
 }
 
+function generateCompletelyRandom(settings)
+{
+	const n = settings.n;
+	var G = createGraph(n);
+	for (var i = 1; i < n; ++i)
+	{
+		for (var j = 0; j < i; ++j)
+		{
+			if (Math.random() < 0.5)
+			{
+				addEdge(G, i, j);
+			}
+		}
+	}
+	return G;
+}
+
 function generateSplit(settings)
 {
 	var G = createGraph(settings.n);
@@ -337,6 +354,7 @@ function generateChordal(settings)
 						simplicialNeighbors.push(chosenCliqueGroup[i]);
 					}
 				}
+				break;
 			}
 			clique -= subCliques;
 		}

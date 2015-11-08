@@ -420,6 +420,9 @@ function menuGenerateClicked()
 		case "chordal":
 			menuGenerate(generateChordal);
 			break;
+		case "random":
+			menuGenerate(generateCompletelyRandom)
+			break;
 	}
 }
 
@@ -449,6 +452,9 @@ function menuGenerateChanged()
 			break;
 		case "chordal":
 			helpURL.href = "https://en.wikipedia.org/wiki/Chordal_graph";
+			break;
+		case "random":
+			helpURL.href = "";
 			break;
 	}
 }
