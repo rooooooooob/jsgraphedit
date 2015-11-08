@@ -30,11 +30,14 @@ CircularQueue.prototype.pop = function()
 {
 	const ret = this.buffer[this.front];
 	this.buffer[this.front] = null;
-	this.front = (this.front + 1) % this.buffer.length;
-	if (this.length() == 0)
+	if (this.length() == 1)
 	{
-		this.back = 0;
+		this.back = -1;
 		this.front = -1;
+	}
+	else
+	{
+		this.front = (this.front + 1) % this.buffer.length;
 	}
 	return ret;
 };
