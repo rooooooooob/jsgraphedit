@@ -10,7 +10,7 @@ function wholeEdge(u , v)
 	return [u, v];
 }
 
-function dfs(G, start, processEdge = destinationOnly)
+function dfs(G, start, processEdge)
 {
 	var order = [processEdge(null, start)];
 	var visited = new Array(G.list.length);
@@ -36,7 +36,7 @@ function dfsInternal(G, u, order, visited, processEdge)
 	}
 }
 
-function bfs(G, start, processEdge = destinationOnly)
+function bfs(G, start, processEdge)
 {
 	var order = [];
 	var visited = new Array(G.list.length);
@@ -66,7 +66,7 @@ function bfs(G, start, processEdge = destinationOnly)
 
 function isConnected(G)
 {
-	return dfs(G, 0).length == G.list.length;
+	return dfs(G, 0, destinationOnly).length == G.list.length;
 }
 
 function isCut(G, u)
@@ -87,7 +87,7 @@ function isCut(G, u)
 	// which will only visit the entire component if u was non-cut
 	dfsInternal(G, G.list[u][0], order, visited, destinationOnly);
 	
-	return dfs(G, u).length != order.length;
+	return dfs(G, u, destinationOnly).length != order.length;
 }
 
 function countEdges(G)
@@ -192,7 +192,7 @@ function twopathDecompose(G)
 				}
 				else if (componentSize == -1)
 				{
-					componentSize = dfs(H, i).length;
+					componentSize = dfs(H, i, destinationOnly).length;
 				}
 			}
 			if (H.list.length != isolated + componentSize)
@@ -212,7 +212,7 @@ function twopathDecompose(G)
 							if (i != y)
 							{
 								removeEdge(H, x, y);
-								if (componentSize == dfs(H, x).length)
+								if (componentSize == dfs(H, x, destinationOnly).length)
 								{
 									u = i;
 									v = x;
@@ -273,7 +273,7 @@ function isTreeIgnoreIsolatedVertices(G)
 	{
 		if (G.list[i].length > 0)
 		{
-			lastCheckedComponentSize = dfs(G, i).length;
+			lastCheckedComponentSize = dfs(G, i, destinationOnly).length;
 			break;
 		}
 	}
