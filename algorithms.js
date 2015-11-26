@@ -64,6 +64,51 @@ function bfs(G, start, processEdge)
 	return order;
 }
 
+function vertexColouring(G)
+{	
+	var colours = new Array(G.list.length);
+	function backtrack(k, u)
+	{
+		if (u >= G.list.length)
+		{
+			return true;
+		}
+		var bannedColours = new Array(k);
+		bannedColours.fill(false);
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const c = colours[G.list[u][i]];
+			if (c != -1)
+			{
+				bannedColours[c] = true;
+			}
+		}
+		// loop through all colours and assign first unused one
+		for (var i = 0; i < k; ++i)
+		{
+			if (!bannedColours[i])
+			{
+				colours[u] = i;
+				if (backtrack(k, u + 1))
+				{
+					return true;
+				}
+				colours[u] = -1;
+			}
+		}
+		return false;
+	}
+	for (var k = 0; k < G.list.length; ++k)
+	{
+		colours.fill(-1);
+		if (backtrack(k, 0))
+		{
+			break;
+		}
+	}
+	return colours;
+}
+
 function isConnected(G)
 {
 	return dfs(G, 0, destinationOnly).length == G.list.length;

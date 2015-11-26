@@ -354,6 +354,15 @@ function runBFS()
 	redraw();
 }
 
+function runVertexColour()
+{
+	edgeHighlights = {};
+	
+	alert(vertexColouring(G));
+	
+	redraw();
+}
+
 function menuGenerate(genFunc, settings)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)
