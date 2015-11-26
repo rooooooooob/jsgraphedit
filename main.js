@@ -13,6 +13,7 @@ const Modes = {
 };
 var mode = Modes.INSERT;
 var edgeHighlights = {};
+var vertexHighlights = {};
 var lastRandomColourIndex = 0;
 const randomColours = [
 	"#FF0000",
@@ -105,13 +106,11 @@ function redraw()
 		}
 	}
 	// draw vertices on top
-	for (var id = 0; id < G.pos.length; ++id)
+	function drawVertex(u, colour)
 	{
 		context.beginPath();
-		context.arc(G.pos[id].x, G.pos[id].y, vertexSize, 0, 2*Math.PI);
-		context.fillStyle = (id == selectedVertex ? "#555555" : "#BBBBBB");
-		if (isCut(G, id))
-			context.fillStyle = (id == selectedVertex ? "#770000" : "#CC0000");
+		context.arc(G.pos[u].x, G.pos[u].y, vertexSize, 0, 2*Math.PI);
+		context.fillStyle = colour;
 		context.fill();
 		context.lineWidth = 3;
 		context.strokeStyle = "#000000";
@@ -121,7 +120,18 @@ function redraw()
 		context.textAlign = "center";
 		context.textBaseline = "middle";
 		context.fillStyle = "#000000";
-		context.fillText(id, G.pos[id].x, G.pos[id].y);
+		context.fillText(u, G.pos[u].x, G.pos[u].y);
+	}
+	for (var id = 0; id < G.pos.length; ++id)
+	{
+		drawVertex(id, (id == selectedVertex ? "#555555" : "#BBBBBB"));
+	}
+	for (var col in vertexHighlights)
+	{
+		for (var i = 0; i < vertexHighlights[col].length; ++i)
+		{
+			drawVertex(vertexHighlights[col][i], col);
+		}
 	}
 }
 
@@ -356,9 +366,19 @@ function runBFS()
 
 function runVertexColour()
 {
-	edgeHighlights = {};
+	vertexHighlights = {};
 	
-	alert(vertexColouring(G));
+	var colouring = vertexColouring(G);
+	
+	for (var i = 0; i < colouring.length; ++i)
+	{
+		const key = randomColours[colouring[i] % randomColours.length];
+		if (!vertexHighlights[key])
+		{
+			vertexHighlights[key] = [];
+		}
+		vertexHighlights[key].push(i);
+	}
 	
 	redraw();
 }
