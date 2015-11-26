@@ -135,6 +135,12 @@ function redraw()
 	}
 }
 
+function resetHighlights()
+{
+	edgeHighlights = {};
+	vertexHighlights = {};
+}
+
 function getVertexAt(x, y)
 {
 	for (var id = 0; id < G.list.length; ++id)
@@ -160,6 +166,7 @@ function onMouseClick(event)
 		switch (mode)
 		{
 		case Modes.INSERT:
+			resetHighlights();
 			const addedVertex = addVertex(G, x, y);
 			if (selectedVertex != -1)
 			{
@@ -189,10 +196,12 @@ function onMouseClick(event)
 				switch (mode)
 				{
 				case Modes.INSERT:
+					resetHighlights();
 					addEdge(G, selectedVertex, vertexClickedOn);
 					selectedVertex = vertexClickedOn;
 					break;
 				case Modes.REMOVE:
+					resetHighlights();
 					removeEdge(G, selectedVertex, vertexClickedOn);
 					break;
 				}
@@ -201,6 +210,7 @@ function onMouseClick(event)
 			{
 				if (mode == Modes.REMOVE)
 				{
+					resetHighlights();
 					removeVertex(G, selectedVertex);
 					selectedVertex = -1;
 				}
@@ -243,7 +253,9 @@ function readFromList()
 		}
 		++currentVertex;
 	}
-	edgeHighlights = {};
+	
+	resetHighlights();
+	
 	redraw();
 }
 
@@ -283,7 +295,7 @@ function importPrufer()
 	{
 		G = fromPrufer(seq);
 		
-		edgeHighlights = {};
+		resetHighlights();
 		
 		randomizeVertexPositions();
 		
@@ -328,14 +340,16 @@ function runTwopathDecomp()
 
 function runComplement()
 {
-	edgeHighlights = {};
+	resetHighlights();
+	
 	G = complement(G);
+	
 	redraw();
 }
 
 function runBFS()
 {
-	edgeHighlights = {};
+	resetHighlights();
 	
 	var visited = new Array(G.list.length);
 	visited.fill(false);
@@ -366,7 +380,7 @@ function runBFS()
 
 function runVertexColour()
 {
-	vertexHighlights = {};
+	resetHighlights();
 	
 	var colouring = vertexColouring(G);
 	
@@ -394,7 +408,7 @@ function menuGenerate(genFunc, settings)
 	
 		G = genFunc(settings);
 		
-		edgeHighlights = {};
+		resetHighlights();
 
 		randomizeVertexPositions();
 		
