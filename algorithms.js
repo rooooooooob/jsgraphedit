@@ -61,7 +61,7 @@ function bfs(G, start, processEdge)
 	var order = [];
 	var visited = new Array(G.list.length);
 	visited.fill(false);
-	bfsInternal(G, start, visited, processEdge);
+	bfsInternal(G, start, order, visited, processEdge);
 	return order;
 }
 
