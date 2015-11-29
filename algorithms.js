@@ -144,13 +144,22 @@ function vertexColouring(G)
 		}
 		return false;
 	}
-	var order = bfs(G, 0, destinationOnly);
-	for (var k = 0; k < G.list.length; ++k)
+	var order = bfsComponents(G, destinationOnly);
+	// visit every component in BFS order to minimize the amount of 
+	// uncoloured neighbors at every step
+	for (var component = 0; component < order.length; ++component)
 	{
-		colours.fill(-1);
-		if (backtrack(k, order, 0))
+		for (var k = 0; k < G.list.length; ++k)
 		{
-			break;
+			// mark ONLY the colours in this component as uncoloured
+			for (var i = 0; i < order[component].length; ++i)
+			{
+				colours[order[component][i]] = -1;
+			}
+			if (backtrack(k, order[component], 0))
+			{
+				break;
+			}
 		}
 	}
 	return colours;
