@@ -112,12 +112,13 @@ function bfsInternal(G, start, order, visited, processEdge)
 function vertexColouring(G)
 {	
 	var colours = new Array(G.list.length);
-	function backtrack(k, u)
+	function backtrack(k, order, orderIndex)
 	{
-		if (u >= G.list.length)
+		if (orderIndex >= order.length)
 		{
 			return true;
 		}
+		const u = order[orderIndex];
 		var bannedColours = new Array(k);
 		bannedColours.fill(false);
 		for (var i = 0; i < G.list[u].length; ++i)
@@ -134,7 +135,7 @@ function vertexColouring(G)
 			if (!bannedColours[i])
 			{
 				colours[u] = i;
-				if (backtrack(k, u + 1))
+				if (backtrack(k, order, orderIndex + 1))
 				{
 					return true;
 				}
@@ -143,10 +144,11 @@ function vertexColouring(G)
 		}
 		return false;
 	}
+	var order = bfs(G, 0, destinationOnly);
 	for (var k = 0; k < G.list.length; ++k)
 	{
 		colours.fill(-1);
-		if (backtrack(k, 0))
+		if (backtrack(k, order, 0))
 		{
 			break;
 		}
