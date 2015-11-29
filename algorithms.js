@@ -22,6 +22,26 @@ function dfs(G, start, processEdge)
 	return order;
 }
 
+function dfsComponents(G, processEdge)
+{
+	var order = [];
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	
+	for (var i = 0; i < G.list.length; ++i)
+	{
+		if (!visited[i])
+		{
+			visited[i] = true;
+			var compOrder = [processEdge(null, i)];
+			dfsInternal(G, i, compOrder, visited, processEdge);
+			order.push(compOrder);
+		}
+	}
+	
+	return order;
+}
+
 function dfsInternal(G, u, order, visited, processEdge)
 {
 	for (var i = 0; i < G.list[u].length; ++i)
@@ -41,6 +61,32 @@ function bfs(G, start, processEdge)
 	var order = [];
 	var visited = new Array(G.list.length);
 	visited.fill(false);
+	bfsInternal(G, start, visited, processEdge);
+	return order;
+}
+
+function bfsComponents(G, processEdge)
+{
+	var order = [];
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	
+	for (var i = 0; i < G.list.length; ++i)
+	{
+		if (!visited[i])
+		{
+			visited[i] = true;
+			var compOrder = [];
+			bfsInternal(G, i, compOrder, visited, processEdge);
+			order.push(compOrder);
+		}
+	}
+	
+	return order;
+}
+
+function bfsInternal(G, start, order, visited, processEdge)
+{
 	var queue = new CircularQueue(G.list.length);
 	function visit(u, v)
 	{
@@ -61,7 +107,6 @@ function bfs(G, start, processEdge)
 			}
 		}
 	}
-	return order;
 }
 
 function vertexColouring(G)
