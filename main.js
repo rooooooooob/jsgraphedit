@@ -34,6 +34,7 @@ const randomColours = [
 ];
 var satisfyConnected;
 var satisfyTree;
+var satisfyCycles;
 
 function initialise()
 {
@@ -48,6 +49,10 @@ function initialise()
 	satisfyTree = {
 		str : "tree",
 		func : isTree
+	};
+	satisfyCycles = {
+		str : "contains cycles",
+		func : hasCycles
 	};
 		
 	
@@ -432,7 +437,7 @@ function runVertexColour()
 
 function runCycleAnalze()
 {
-	if (require(G, [], [satisfyTree]))
+	if (require(G, [satisfyCycles], []))
 	{
 		var outputBox = document.getElementById("output_textbox_id");
 	

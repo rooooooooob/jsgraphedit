@@ -206,6 +206,37 @@ function isTree(G)
 	return isConnected(G) && G.list.length == countEdges(G) + 1;
 }
 
+function hasCycles(G)
+{
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	function dfs(G, u, last)
+	{
+		visited[u] = true;
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const v = G.list[u][i];
+			if (v != last && visited[v])
+			{
+				return true;
+			}
+			if (!visited[v] && dfs(G, v, u))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	for (var i = 0; i < G.list.length; ++i)
+	{
+		if (!visited[i] && dfs(G, i, i))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 function twopathDecompose(G)
 {
 	var paths = [];	
