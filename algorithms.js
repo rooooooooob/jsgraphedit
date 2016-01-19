@@ -381,3 +381,109 @@ function isTreeIgnoreIsolatedVertices(G)
 	return G.list.length - isolated == lastCheckedComponentSize  // connected (besides isolated)
 	    && G.list.length - isolated == countEdges(G) + 1; // right amount of edges for a tree
 }
+function cyclesToOutput(cycles)
+{
+	var output = [];
+	for (var cycle in cycles)
+	{
+		output.push(cycles[cycle]);
+	}
+	return output;
+}
+
+function computeMinCycles(G)
+{
+	var cycles = {};
+	
+	const n = G.list.length;
+	
+	var girth = n;
+	
+	for (var i = 0; i < n; ++i)
+	{
+		const cyclesAtVertex = computeMinCyclesAt(G, i, girth);
+		if (cyclesAtVertex.length > 0 && cyclesAtVertex[0].length <= girth)
+		{
+			if (cyclesAtVertex[0].length < girth)
+			{
+				cycles = {};
+				girth = cyclesAtVertex[0].length;
+			}
+			for (var j = 0; j < cyclesAtVertex.length; ++j)
+			{
+				cycles[cyclesAtVertex[j].toString()] = cyclesAtVertex[j];
+			}
+		}
+	}
+	return cyclesToOutput(cycles);
+}
+
+function computeMinCyclesAt(G, root, girth)
+{
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	var stack = [];
+	var cycles = {};
+	function backtrack(G, u)
+	{
+		visited[u] = true;
+		stack.push(u);
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const v = G.list[u][i];
+			if (stack.length > 2 && v == root)
+			{
+				if (stack.length < girth)
+				{
+					cycles = {};
+					girth = stack.length;
+				}
+				const canonical = canonicalFormCycle(stack);
+				cycles[canonical.toString()] = canonical;
+				//alert("found cycle of length " + girth + " from vertex " + root);
+				continue;
+			}
+			if (!visited[v] && stack.length < girth)
+			{
+				backtrack(G, v);
+			}
+		}
+		stack.pop();
+		visited[u] = false;
+	}
+	backtrack(G, root);
+	return cyclesToOutput(cycles);
+}
+
+function canonicalFormCycle(C)
+{
+	// compare cycles in a canonical form by rotating to the smallest element
+	// with the additional requirement that the 2nd element be smaller than the
+	// 2nd to prevent each cycle being stored twice
+	var minIndex = 0;
+	const k = C.length;
+	for (var i = 1; i < k; ++i)
+	{
+		if (C[i] < C[minIndex])
+		{
+			minIndex = i;
+		}
+	}
+	var canonicalForm = new Array(k);
+	// now test if the next one is smaller than the previous, if not mirror
+	if (C[(minIndex + 1) % k] > C[(minIndex + k - 1) % k])
+	{
+		for (var i = 0; i < k; ++i)
+		{
+			canonicalForm[(k - i) % k] = C[(minIndex + i) % k];
+		}
+	}
+	else
+	{
+		for (var i = 0; i < k; ++i)
+		{
+			canonicalForm[i] = C[(minIndex + i) % k];
+		}
+	}
+	return canonicalForm;
+}
