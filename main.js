@@ -438,8 +438,26 @@ function runCycleAnalze()
 	
 		resetHighlights();
 		
+		const cycles = computeMinCycles(G);
 		
-	
+		const girth = cycles[0].length;
+		outputBox.value = "Girth: " + girth;
+		
+		for (var i = 0; i < cycles.length; ++i)
+		{
+			const key = randomColours[i % randomColours.length];
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
+			for (var j = 0; j < cycles[i].length; ++j)
+			{
+				const u = cycles[i][j];
+				const v = cycles[i][(j + 1) % girth];
+				edgeHighlights[key].push([u, v]);
+			}
+			outputBox.value += ", [" + cycles[i] + "]";
+		}
 		redraw();
 	}
 }
