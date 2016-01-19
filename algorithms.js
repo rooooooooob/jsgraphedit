@@ -149,7 +149,7 @@ function vertexColouring(G)
 	// uncoloured neighbors at every step
 	for (var component = 0; component < order.length; ++component)
 	{
-		for (var k = 0; k < G.list.length; ++k)
+		for (var k = 1; k <= G.list.length; ++k)
 		{
 			// mark ONLY the colours in this component as uncoloured
 			for (var i = 0; i < order[component].length; ++i)
