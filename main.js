@@ -305,7 +305,7 @@ function importPrufer()
 
 function exportPrufer()
 {
-	if (require(G, [satisfyTree]))
+	if (require(G, [satisfyTree], []))
 	{
 		document.getElementById("prufer_textbox_id").value = toPrufer(G).join(" ");
 	}
@@ -317,7 +317,7 @@ function runTwopathDecomp()
 		str : "even size",
 		func : function(G) { return countEdges(G) % 2 == 0; }
 	};
-	if (require(G, [satisfyConnected, evenSize]))
+	if (require(G, [satisfyConnected, evenSize], []))
 	{
 		var outputBox = document.getElementById("output_textbox_id");
 		outputBox.value = "3-paths: ";
@@ -430,6 +430,20 @@ function runVertexColour()
 	redraw();
 }
 
+function runCycleAnalze()
+{
+	if (require(G, [], [satisfyTree]))
+	{
+		var outputBox = document.getElementById("output_textbox_id");
+	
+		resetHighlights();
+		
+		
+	
+		redraw();
+	}
+}
+
 function menuGenerate(genFunc, settings)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)
@@ -453,7 +467,7 @@ function menuGenerate(genFunc, settings)
 	}
 }
 
-function require(G, conditions)
+function require(G, conditions, forbidden)
 {
 	var failed = [];
 	for (var i = 0; i < conditions.length; ++i)
@@ -461,6 +475,13 @@ function require(G, conditions)
 		if (!conditions[i].func(G))
 		{
 			failed.push(conditions[i].str);
+		}
+	}
+	for (var i = 0; i < forbidden.length; ++i)
+	{
+		if (forbidden[i].func(G))
+		{
+			failed.push("NOT " + forbidden[i].str);
 		}
 	}
 	if (failed.length > 0)
