@@ -319,6 +319,9 @@ function runTwopathDecomp()
 	};
 	if (require(G, [satisfyConnected, evenSize]))
 	{
+		var outputBox = document.getElementById("output_textbox_id");
+		outputBox.value = "3-paths: ";
+	
 		edgeHighlights = {};
 		var twopaths = twopathDecompose(G);
 		for (var i = 0; i < twopaths.length; ++i)
@@ -332,6 +335,12 @@ function runTwopathDecomp()
 			{
 				edgeHighlights[key].push(twopaths[i][j]);
 			}
+			
+			if (i > 0)
+			{
+				outputBox.value += ", ";
+			}
+			outputBox.value += twopaths[i][0][0] + "-" + twopaths[i][0][1] + "-" + twopaths[i][1][1];
 		}
 		
 		redraw();
@@ -352,6 +361,7 @@ function runBFS()
 	resetHighlights();
 	
 	var outputBox = document.getElementById("output_textbox_id");
+	outputBox.value = "";
 	
 	var visited = new Array(G.list.length);
 	visited.fill(false);
@@ -396,10 +406,17 @@ function runVertexColour()
 {
 	resetHighlights();
 	
+	var outputBox = document.getElementById("output_textbox_id");
+	
 	var colouring = vertexColouring(G);
 	
+	var colours = 0;
 	for (var i = 0; i < colouring.length; ++i)
 	{
+		if (colouring[i] + 1 > colours)
+		{
+			colours = colouring[i] + 1;
+		}
 		const key = randomColours[colouring[i] % randomColours.length];
 		if (!vertexHighlights[key])
 		{
@@ -407,6 +424,8 @@ function runVertexColour()
 		}
 		vertexHighlights[key].push(i);
 	}
+	
+	outputBox.value = colours + "-colourable using " + colouring + "\n";
 	
 	redraw();
 }
