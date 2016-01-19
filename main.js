@@ -351,8 +351,11 @@ function runBFS()
 {
 	resetHighlights();
 	
+	var outputBox = document.getElementById("output_textbox_id");
+	
 	var visited = new Array(G.list.length);
 	visited.fill(false);
+	var component = 1;
 	for (var i = 0; i < G.list.length; ++i)
 	{
 		if (!visited[i])
@@ -372,6 +375,17 @@ function runBFS()
 					edgeHighlights[key].push(bfsTree[j]);
 				}
 			}
+			outputBox.value += "Component" + component + ": ";
+			for (var j = 0; j < bfsTree.length; ++j)
+			{
+				if (j > 0)
+				{
+					outputBox.value +=  ", ";
+				}
+				outputBox.value += bfsTree[j][1];
+			}
+			outputBox.value += "\n";
+			++component;
 		}
 	}
 	
