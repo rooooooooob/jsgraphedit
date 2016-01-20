@@ -95,6 +95,14 @@ function redraw()
 			context.stroke();
 		}
 	}
+	// draw overlapping edge highlights as arcs going 
+	// away from the main edge so that you can see them all
+	var edgeHighlightCount = new Array(G.list.length);
+	for (var i = 0; i < G.list.length; ++i)
+	{	edgeHighlightCount[i] = new Array(G.list.length);
+		edgeHighlightCount[i].fill(0);
+	}
+	
 	// draw coloured edge highlights on top
 	for (var col in edgeHighlights)
 	{
@@ -102,11 +110,41 @@ function redraw()
 		{
 			const u = edgeHighlights[col][i][0];
 			const v = edgeHighlights[col][i][1];
+			
+			var bezierOffset = edgeHighlightCount[u][v];
+			++(edgeHighlightCount[u][v]);
+			++(edgeHighlightCount[v][u]);
+			
 			context.beginPath();
 			context.strokeStyle = col;
 			context.lineWidth = 4;
 			context.moveTo(G.pos[u].x, G.pos[u].y);
-			context.lineTo(G.pos[v].x, G.pos[v].y);
+			if (bezierOffset == 0)
+			{
+				context.lineTo(G.pos[v].x, G.pos[v].y);	
+			}
+			else
+			{
+				if (bezierOffset > 0 && bezierOffset % 2 == 0)
+				{
+					// flip offset across the line
+					bezierOffset = -(bezierOffset - 1);
+				}
+				const midx = (G.pos[u].x + G.pos[v].x) / 2;
+				const midy = (G.pos[u].y + G.pos[v].y) / 2;
+				const xdif = G.pos[v].x - G.pos[u].x;
+				const ydif = G.pos[v].y - G.pos[u].y;
+				const dist = Math.sqrt(xdif * xdif + ydif * ydif);
+				const norm = Math.atan2(ydif, xdif) + Math.PI / 2;
+				const normScalar = 8 + bezierOffset * Math.log(dist*dist);
+				const controlx = midx + normScalar * Math.cos(norm);
+				const controly = midy + normScalar * Math.sin(norm);
+				//context.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
+				context.lineTo(controlx, controly);
+				context.stroke();
+				context.moveTo(controlx, controly);
+				context.lineTo(G.pos[v].x, G.pos[v].y);
+			}
 			context.stroke();
 		}
 	}
