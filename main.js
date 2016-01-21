@@ -99,7 +99,9 @@ function redraw()
 	// away from the main edge so that you can see them all
 	var edgeHighlightCount = new Array(G.list.length);
 	for (var i = 0; i < G.list.length; ++i)
-	{	edgeHighlightCount[i] = new Array(G.list.length);
+	{
+		// triangular array since always indexed [i][j] with i > j (or i >= j if we allow loops later)
+		edgeHighlightCount[i] = new Array(i + 1);
 		edgeHighlightCount[i].fill(0);
 	}
 	
@@ -108,12 +110,15 @@ function redraw()
 	{
 		for (var i = 0; i < edgeHighlights[col].length; ++i)
 		{
-			const u = edgeHighlights[col][i][0];
-			const v = edgeHighlights[col][i][1];
+			// this is important to get rid of potentially issues when it would
+			// otherwise draw both u,v and v,u in overlapping spots  when one would
+			// have one higher bezierIndex than the toher
+			const u = Math.min(edgeHighlights[col][i][0], edgeHighlights[col][i][1]);
+			const v = Math.max(edgeHighlights[col][i][0], edgeHighlights[col][i][1]);
 			
-			var bezierOffset = edgeHighlightCount[u][v];
-			++(edgeHighlightCount[u][v]);
+			var bezierOffset = edgeHighlightCount[v][u];
 			++(edgeHighlightCount[v][u]);
+			
 			
 			context.beginPath();
 			context.strokeStyle = col;
@@ -125,25 +130,19 @@ function redraw()
 			}
 			else
 			{
-				if (bezierOffset > 0 && bezierOffset % 2 == 0)
-				{
-					// flip offset across the line
-					bezierOffset = -(bezierOffset - 1);
-				}
+				// flip norm across the line on odd lines so that they alternate
+				const normAngle = (bezierOffset % 2 == 0) ? (Math.PI / 2) : (-Math.PI / 2);
+				bezierOffset = Math.floor((bezierOffset + 1) / 2);
 				const midx = (G.pos[u].x + G.pos[v].x) / 2;
 				const midy = (G.pos[u].y + G.pos[v].y) / 2;
 				const xdif = G.pos[v].x - G.pos[u].x;
 				const ydif = G.pos[v].y - G.pos[u].y;
 				const dist = Math.sqrt(xdif * xdif + ydif * ydif);
-				const norm = Math.atan2(ydif, xdif) + Math.PI / 2;
-				const normScalar = 8 + bezierOffset * Math.log(dist*dist);
+				const norm = Math.atan2(ydif, xdif) + normAngle;
+				const normScalar = 3 + bezierOffset * 1.3 + bezierOffset * 0.1 * Math.pow(dist, 0.9);
 				const controlx = midx + normScalar * Math.cos(norm);
 				const controly = midy + normScalar * Math.sin(norm);
-				//context.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
-				context.lineTo(controlx, controly);
-				context.stroke();
-				context.moveTo(controlx, controly);
-				context.lineTo(G.pos[v].x, G.pos[v].y);
+				context.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
 			}
 			context.stroke();
 		}
