@@ -326,11 +326,13 @@ function importPrufer()
 		{
 			alert("elements in sequence must be numbers separated by whitespace");
 			failed = true;
+			break;
 		}
 		else if (seq[i] < 0 || seq >= seq.length + 2)
 		{
 			alert("elements must in the range [0, n) for a sequence of length n - 2 to generate a tree on n vertices with (n = " + seq.length + 2 + ")");
 			failed = true;
+			break;
 		}
 	}
 	if (!failed)
@@ -472,7 +474,7 @@ function runVertexColour()
 	redraw();
 }
 
-function runCycleAnalze()
+function runCycleAnalyze()
 {
 	if (require(G, [satisfyCycles], []))
 	{
@@ -501,6 +503,45 @@ function runCycleAnalze()
 			outputBox.value += ", [" + cycles[i] + "]";
 		}
 		redraw();
+	}
+}
+
+function menuAlgorithmChanged()
+{
+	switch (document.getElementById("menu_algorithm_select_id").value)
+	{
+		case "3pathdecomp":
+			break;
+		case "complement":
+			break;
+		case "bfs":
+			break;
+		case "vertex_colour":
+			break;
+		case "min_cycles":
+			break;
+	}
+}
+
+function menuAlgorithmRun()
+{
+	switch (document.getElementById("menu_algorithm_select_id").value)
+	{
+		case "3pathdecomp":
+			runTwopathDecomp();
+			break;
+		case "complement":
+			runComplement();
+			break;
+		case "bfs":
+			runBFS();
+			break;
+		case "vertex_colour":
+			runVertexColour();
+			break;
+		case "min_cycles":
+			runCycleAnalyze();
+			break;
 	}
 }
 

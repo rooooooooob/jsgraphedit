@@ -25,12 +25,17 @@
 	<button onClick="setModeToRemove()">Remove</button>
 	<button onClick="setModeToMove()">Move</button>
 	Run Algorithm:
-	<button onClick="runTwopathDecomp()">3-Path Decomp</button>
-	<button onClick="runComplement()">Complement</button>
-	<button onClick="runBFS()">BFS</button>
-	<button onClick="runVertexColour()">Vertex Colour</button>
-	<button onClick="runCycleAnalze()">Min Cycles</button>
+	<select id="menu_algorithm_select_id" onChange="menuAlgorithmChanged()">
+		<option value="3pathdecomp">3-Path Decompose</option>
+		<option value="complement">Complement</option>
+		<option value="bfs">BFS</option>
+		<option value="vertex_colour">Vertex Colour</option>
+		<option value="min_cycles">Min Cycles</option>
+	</select>
 	
+	<button onClick="menuAlgorithmRun()">Run</button>
+	<div id="algorithm_div_id">
+	</div>
 	<hr>
 	
 	<canvas id="myCanvas" width="640" height="480"
