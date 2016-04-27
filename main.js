@@ -164,6 +164,15 @@ function redraw()
 		context.fillStyle = "#000000";
 		context.fillText(u, G.pos[u].x, G.pos[u].y);
 	}
+	function darkenColour(colour, lum)
+	{
+		// assumes 0 <= lum <= 1
+		var colourNum = parseInt(colour.slice(1),16);
+		var r = Math.round(((colourNum >> 16) & 0xFF) * lum)
+		var g = Math.round(((colourNum >> 8) & 0xFF) * lum)
+		var b = Math.round((colourNum & 0xFF) * lum)
+		return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+	}
 	for (var id = 0; id < G.pos.length; ++id)
 	{
 		drawVertex(id, (id == selectedVertex ? "#555555" : "#BBBBBB"));
@@ -172,7 +181,7 @@ function redraw()
 	{
 		for (var i = 0; i < vertexHighlights[col].length; ++i)
 		{
-			drawVertex(vertexHighlights[col][i], col);
+			drawVertex(vertexHighlights[col][i], darkenColour(col, (vertexHighlights[col][i] == selectedVertex ? 0.4 : 0.8)));
 		}
 	}
 }
@@ -420,6 +429,10 @@ function runBFS()
 			{
 				edgeHighlights[key] = [];
 			}
+			if (!vertexHighlights[key])
+			{
+				vertexHighlights[key] = [];
+			}
 			for (var j = 0; j < bfsTree.length; ++j)
 			{
 				visited[bfsTree[j][1]] = true;
@@ -428,6 +441,7 @@ function runBFS()
 				{
 					edgeHighlights[key].push(bfsTree[j]);
 				}
+				vertexHighlights[key].push(bfsTree[j][1]);
 			}
 			outputBox.value += "Component" + component + ": ";
 			for (var j = 0; j < bfsTree.length; ++j)
