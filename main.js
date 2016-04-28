@@ -460,6 +460,57 @@ function runBFS()
 	redraw();
 }
 
+function runDFS()
+{
+	resetHighlights();
+	
+	var outputBox = document.getElementById("output_textbox_id");
+	outputBox.value = "";
+	
+	var visited = new Array(G.list.length);
+	visited.fill(false);
+	var component = 1;
+	for (var i = 0; i < G.list.length; ++i)
+	{
+		if (!visited[i])
+		{
+			const dfsTree = dfs(G, i, wholeEdge);
+			const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+			if (!edgeHighlights[key])
+			{
+				edgeHighlights[key] = [];
+			}
+			if (!vertexHighlights[key])
+			{
+				vertexHighlights[key] = [];
+			}
+			for (var j = 0; j < dfsTree.length; ++j)
+			{
+				visited[dfsTree[j][1]] = true;
+				// don't draw first edge, since it's [null, start]
+				if (j > 0)
+				{
+					edgeHighlights[key].push(dfsTree[j]);
+				}
+				vertexHighlights[key].push(dfsTree[j][1]);
+			}
+			outputBox.value += "Component" + component + ": ";
+			for (var j = 0; j < dfsTree.length; ++j)
+			{
+				if (j > 0)
+				{
+					outputBox.value +=  ", ";
+				}
+				outputBox.value += dfsTree[j][1];
+			}
+			outputBox.value += "\n";
+			++component;
+		}
+	}
+	
+	redraw();
+}
+
 function runVertexColour()
 {
 	resetHighlights();
@@ -530,6 +581,8 @@ function menuAlgorithmChanged()
 			break;
 		case "bfs":
 			break;
+		case "dfs":
+			break;
 		case "vertex_colour":
 			break;
 		case "min_cycles":
@@ -549,6 +602,9 @@ function menuAlgorithmRun()
 			break;
 		case "bfs":
 			runBFS();
+			break;
+		case "dfs":
+			runDFS();
 			break;
 		case "vertex_colour":
 			runVertexColour();
