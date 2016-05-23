@@ -364,6 +364,76 @@ function exportPrufer()
 	}
 }
 
+function importUppertri()
+{
+	var input = document.getElementById("upper_tri_textbox_id").value.split(" ");
+	var failed = false;
+	if (input.length != 2)
+	{
+		alert("Input must be the number of vertices followed by adjacencies");
+		failed = true;
+	}
+	else
+	{
+		const n = parseInt(input[0], 10);
+		if (n == NaN)
+		{
+			alert("Number of vertices must be a number");
+			failed = true;
+		}
+		else if (n * (n - 1) / 2 != input[1].length)
+		{
+			alert("Number of vertices must be equal to the size of an upper-triangular adjacency matrix specified next without whitespace ie 3 111 is K_3 and 4 101101 is C_4 and 4 100101 is P_4");
+			failed = true;
+		}
+		for (var i = 0; i < input[1].length; ++i)
+		{
+			if (input[1][i] != '0' && input[1][i] != '1')
+			{
+				alert("Adjacencies must contain only 0s and 1s");
+				failed = true;
+				break;
+			}
+		}
+	}
+	if (!failed)
+	{
+		const n = parseInt(input[0], 10);
+		G = createGraph(n);
+		var i = 0;
+		for (var r = 0; r < n; ++r)
+		{
+			for (var c = r + 1; c < n; ++c)
+			{
+				if (input[1][i++] == '1')
+				{
+					addEdge(G, r, c);
+				}
+			}
+		}
+	
+		resetHighlights();
+	
+		randomizeVertexPositions();
+	
+		redraw();
+	}
+}
+
+function exportUppertri()
+{
+	const n = G.list.length;
+	var str = n + " ";
+	for (var r = 0; r < n; ++r)
+	{
+		for (var c = r + 1; c < n; ++c)
+		{
+			str += hasEdge(G, r, c) ? '1' : '0';
+		}
+	}
+	document.getElementById("upper_tri_textbox_id").value = str;
+}
+
 function runTwopathDecomp()
 {
 	var evenSize = {

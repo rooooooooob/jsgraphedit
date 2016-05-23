@@ -94,6 +94,16 @@ function addArc(G, u, v)
 	}
 }
 
+function hasEdge(G, u, v)
+{
+	return hasArc(G, u, v) || hasArc(G, v, u);
+}
+
+function hasArc(G, u, v)
+{
+	return G.matrix[u][v] == 1;
+}
+
 function addVertex(G, x, y)
 {
 	G.list.push([]);
