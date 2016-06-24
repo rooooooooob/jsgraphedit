@@ -5,9 +5,9 @@ var context;
 var G = [];
 const vertexSize = 16;
 var clickedVertex = -1;
+var clickedEdge = -1;
 var selectedVertex = -1;
-var selectedEdge1 = -1;
-var selectedEdge2 = -1;
+var selectedEdge = -1;
 var mx = -1;
 var my = -1;
 var directed = false;
@@ -90,17 +90,32 @@ function redraw()
 	context.fillStyle = "#DDDDDD";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	// draw edges
-	for (var id = 0; id < G.list.length; ++id)
+	for (var u = 0; u < G.list.length; ++u)
 	{
-		const neighbors = G.list[id];
+		const neighbors = G.list[u];
 		for (var i = 0; i < neighbors.length; ++i)
 		{
-			context.beginPath();
-			context.strokeStyle = "#000000";
-			context.lineWidth = 3;
-			context.moveTo(G.pos[id].x, G.pos[id].y);
-			context.lineTo(G.pos[neighbors[i]].x, G.pos[neighbors[i]].y);
-			context.stroke();
+			const v = neighbors[i];
+			// so we don't draw each edge twice
+			// and also for easily checking against selected edge
+			if (u < v)
+			{
+				if (selectedEdge[0] == u && selectedEdge[1] == v)
+				{
+					context.beginPath();
+					context.strokeStyle = "#AA0000";
+					context.lineWidth = 9;
+					context.moveTo(G.pos[u].x, G.pos[u].y);
+					context.lineTo(G.pos[v].x, G.pos[v].y);
+					context.stroke();
+				}
+				context.beginPath();
+				context.strokeStyle = "#000000";
+				context.lineWidth = 3;
+				context.moveTo(G.pos[u].x, G.pos[u].y);
+				context.lineTo(G.pos[v].x, G.pos[v].y);
+				context.stroke();
+			}
 		}
 	}
 	// draw overlapping edge highlights as arcs going 
@@ -134,10 +149,6 @@ function redraw()
 			context.moveTo(G.pos[u].x, G.pos[u].y);
 			if (bezierOffset == 0)
 			{
-				if ((u == selectedEdge1 && v == selectedEdge2) || (u == selectedEdge2 && v == selectedEdge1))
-				{
-					context.lineWidth = 9;
-				}
 				context.lineTo(G.pos[v].x, G.pos[v].y);
 			}
 			else
@@ -228,6 +239,42 @@ function getVertexAt(x, y)
 	return -1;
 }
 
+function getEdgeAt(x, y)
+{
+	for (var u = 0; u < G.list.length; ++u)
+	{
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const v = G.list[u][i];
+			if (u < v) // to prevent checking the same edge twice
+			{
+				// project the u-mouse vector onto the u-v vector
+				// then subtrct it from the mouse vector to get
+				// a vector from the line to the mouse perp to the edge
+				const umx = x - G.pos[u].x;
+				const umy = y - G.pos[u].y;
+				const uvx = G.pos[v].x - G.pos[u].x;
+				const uvy = G.pos[v].y - G.pos[u].y;
+				const projAmpl = (uvx*umx + uvy*umy)/(uvx*uvx + uvy*uvy);
+				// if this amplitude is negative or longer than 1
+				// then (x, y) is too far past or not far enough to be on the u-v line
+				if (projAmpl >= 0 && projAmpl < 1)
+				{
+					const perpx = umx - projAmpl*uvx;
+					const perpy = umy - projAmpl*uvy;
+					const distToLine = Math.sqrt(perpx*perpx + perpy*perpy);
+					if (distToLine <= 8 && distToLine >= -8)
+					{
+						// u < v so this is the canonical form already
+						return [u, v];
+					}
+				}
+			}
+		}
+	}
+	return -1;
+}
+
 function onMouseDown(event)
 {
 	const x = event.clientX - canvas.getBoundingClientRect().left;
@@ -235,7 +282,16 @@ function onMouseDown(event)
 	const vertexAtMouse = getVertexAt(x, y);
 	if (vertexAtMouse == -1)
 	{
-		unselect();
+		const edgeAtMouse = getEdgeAt(x, y);
+		if (edgeAtMouse == -1)
+		{
+			unselect();
+			redraw();
+		}
+		else
+		{
+			clickedEdge = edgeAtMouse;
+		}
 	}
 	else
 	{
@@ -243,6 +299,7 @@ function onMouseDown(event)
 		if (selectedVertex != vertexAtMouse)
 		{
 			unselect();
+			redraw();
 		}
 		clickedVertex = vertexAtMouse;
 	}
@@ -277,49 +334,65 @@ function onMouseUp(event)
 {
 	const x = event.clientX - canvas.getBoundingClientRect().left;
 	const y = event.clientY - canvas.getBoundingClientRect().top;
-	const vertexAtMouse = getVertexAt(x, y);
-	// didn't click on vertex -> create new vertex
-	if (vertexAtMouse == -1)
+	if (clickedEdge != -1)
 	{
-		if (clickedVertex == -1 && selectedVertex == -1)
-		{
-			resetHighlights();
-			addVertex(G, x, y);
-		}
-		if (selectedVertex != -1)
+		if (selectedEdge[0] == clickedEdge[0] && selectedEdge[1] == clickedEdge[1])
 		{
 			unselect();
-		}
-	}
-	else // mouse over a vertex -> add edge if dragged to another vertex
-	{
-		if (clickedVertex != -1)
-		{
-			// no self-loops
-			if (vertexAtMouse != clickedVertex)
-			{
-				resetHighlights();
-				addEdge(G, clickedVertex, vertexAtMouse);
-				clickedVertex = vertexAtMouse;
-			}
-			else
-			{
-				if (selectedVertex == clickedVertex)
-				{
-					unselect();
-				}
-				else
-				{
-					selectVertex(clickedVertex);
-				}
-			}
 		}
 		else
 		{
-			unselect();
+			selectEdge(clickedEdge[0], clickedEdge[1]);
 		}
+		redraw();
+	}
+	else
+	{
+		const vertexAtMouse = getVertexAt(x, y);
+		// didn't click on vertex -> create new vertex
+		if (vertexAtMouse == -1)
+		{
+			if (clickedVertex == -1 && selectedVertex == -1)
+			{
+				resetHighlights();
+				addVertex(G, x, y);
+			}
+			if (selectedVertex != -1)
+			{
+				unselect();
+			}
+		}
+		else // mouse over a vertex -> add edge if dragged to another vertex
+		{
+			if (clickedVertex != -1)
+			{
+				// no self-loops
+				if (vertexAtMouse != clickedVertex)
+				{
+					resetHighlights();
+					addEdge(G, clickedVertex, vertexAtMouse);
+					clickedVertex = vertexAtMouse;
+				}
+				else
+				{
+					if (selectedVertex == clickedVertex)
+					{
+						unselect();
+					}
+					else
+					{
+						selectVertex(clickedVertex);
+					}
+				}
+			}
+			else
+			{
+				unselect();
+			}
+		}	
 	}
 	clickedVertex = -1;
+	clickedEdge = -1;
 	redraw();
 }
 
@@ -334,24 +407,21 @@ function onKeyDown(event)
 function selectVertex(vertex)
 {
 	selectedVertex = vertex;
-	selectedEdge1 = -1;
-	selectedEdge2 = -1;
+	selectedEdge = -1;
 	document.getElementById("remove_selected_id").disabled = false;
 }
 
 function selectEdge(u, v)
 {
 	selectedVertex = -1;
-	selectedEdge1 = u;
-	selectedEdge2 = v;
+	selectedEdge = [u, v];
 	document.getElementById("remove_selected_id").disabled = false;
 }
 
 function unselect()
 {
 	selectedVertex = -1;
-	selectedEdge1 = -1;
-	selectedEdge2 = -1;
+	selectedEdge = -1;
 	document.getElementById("remove_selected_id").disabled = true;
 }
 
@@ -369,15 +439,21 @@ function removeSelected()
 	if (selectedVertex != -1)
 	{
 		removeVertex(G, selectedVertex);
-		
-		resetHighlights();
-		
-		redraw();
+	}
+	else if (selectedEdge != -1)
+	{
+		removeEdge(G, selectedEdge[0], selectedEdge[1]);
 	}
 	else
 	{
 		alert("Uh oh, how did you click remove selected without selecting something?");
 	}
+	
+	unselect();
+	
+	resetHighlights();
+		
+	redraw();
 }
 
 function readFromList()
