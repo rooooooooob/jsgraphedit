@@ -48,6 +48,7 @@ function initialise()
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mousemove", onMouseMove, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
+	canvas.addEventListener("keydown", onKeyDown, false);
 	
 	satisfyConnected = {
 		str : "connected",
@@ -234,14 +235,14 @@ function onMouseDown(event)
 	const vertexAtMouse = getVertexAt(x, y);
 	if (vertexAtMouse == -1)
 	{
-		selectedVertex = -1;
+		unselect();
 	}
 	else
 	{
 		// only remove the selection if we didn't intend to move the vertex
 		if (selectedVertex != vertexAtMouse)
 		{
-			selectedVertex = -1;
+			unselect();
 		}
 		clickedVertex = vertexAtMouse;
 	}
@@ -287,7 +288,7 @@ function onMouseUp(event)
 		}
 		if (selectedVertex != -1)
 		{
-			selectedVertex = -1;
+			unselect();
 		}
 	}
 	else // mouse over a vertex -> add edge if dragged to another vertex
@@ -305,21 +306,78 @@ function onMouseUp(event)
 			{
 				if (selectedVertex == clickedVertex)
 				{
-					selectedVertex = -1;
+					unselect();
 				}
 				else
 				{
-					selectedVertex = clickedVertex;
+					selectVertex(clickedVertex);
 				}
 			}
 		}
 		else
 		{
-			selectedVertex = -1;
+			unselect();
 		}
 	}
 	clickedVertex = -1;
 	redraw();
+}
+
+function onKeyDown(event)
+{
+	//if (event.keyCode == 46) // delete
+	{
+		removeSelected();
+	}
+}
+
+function selectVertex(vertex)
+{
+	selectedVertex = vertex;
+	selectedEdge1 = -1;
+	selectedEdge2 = -1;
+	document.getElementById("remove_selected_id").disabled = false;
+}
+
+function selectEdge(u, v)
+{
+	selectedVertex = -1;
+	selectedEdge1 = u;
+	selectedEdge2 = v;
+	document.getElementById("remove_selected_id").disabled = false;
+}
+
+function unselect()
+{
+	selectedVertex = -1;
+	selectedEdge1 = -1;
+	selectedEdge2 = -1;
+	document.getElementById("remove_selected_id").disabled = true;
+}
+
+function clearGraph()
+{
+	G = createGraph(0);
+	
+	resetHighlights();
+	
+	redraw();
+}
+
+function removeSelected()
+{
+	if (selectedVertex != -1)
+	{
+		removeVertex(G, selectedVertex);
+		
+		resetHighlights();
+		
+		redraw();
+	}
+	else
+	{
+		alert("Uh oh, how did you click remove selected without selecting something?");
+	}
 }
 
 function readFromList()
@@ -839,26 +897,6 @@ function menuGenerateChanged()
 			helpURL.href = "";
 			break;
 	}
-}
-
-function setMode(newMode)
-{
-	mode = newMode;
-}
-
-function setModeToInsert()
-{
-	setMode(Modes.INSERT);
-}
-
-function setModeToRemove()
-{
-	setMode(Modes.REMOVE);
-}
-
-function setModeToMove()
-{
-	setMode(Modes.MOVE);
 }
 
 function randomizeVertexPositions()

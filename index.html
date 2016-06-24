@@ -20,10 +20,8 @@
 	
 	<hr>
 	
-	Change Mode: 
-	<button onClick="setModeToInsert()">Insert</button>
-	<button onClick="setModeToRemove()">Remove</button>
-	<button onClick="setModeToMove()">Move</button>
+	<button onClick="clearGraph()">Clear</button>
+	<button id="remove_selected_id" onClick="removeSelected()" disabled=true>Remove</button>
 	Run Algorithm:
 	<select id="menu_algorithm_select_id" onChange="menuAlgorithmChanged()">
 		<option value="3pathdecomp">3-Path Decompose</option>
