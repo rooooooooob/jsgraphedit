@@ -4,7 +4,12 @@ var canvas;
 var context;
 var G = [];
 const vertexSize = 16;
+var clickedVertex = -1;
 var selectedVertex = -1;
+var selectedEdge1 = -1;
+var selectedEdge2 = -1;
+var mx = -1;
+var my = -1;
 var directed = false;
 const Modes = {
 	INSERT : "insert",
@@ -40,7 +45,9 @@ function initialise()
 {
 	canvas = document.getElementById("myCanvas");
 	context = canvas.getContext("2d");
-	canvas.addEventListener("mousedown", onMouseClick, false);
+	canvas.addEventListener("mousedown", onMouseDown, false);
+	canvas.addEventListener("mousemove", onMouseMove, false);
+	canvas.addEventListener("mouseup", onMouseUp, false);
 	
 	satisfyConnected = {
 		str : "connected",
@@ -78,7 +85,7 @@ function initialise()
 }
 
 function redraw()
-{
+{	
 	context.fillStyle = "#DDDDDD";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	// draw edges
@@ -126,7 +133,11 @@ function redraw()
 			context.moveTo(G.pos[u].x, G.pos[u].y);
 			if (bezierOffset == 0)
 			{
-				context.lineTo(G.pos[v].x, G.pos[v].y);	
+				if ((u == selectedEdge1 && v == selectedEdge2) || (u == selectedEdge2 && v == selectedEdge1))
+				{
+					context.lineWidth = 9;
+				}
+				context.lineTo(G.pos[v].x, G.pos[v].y);
 			}
 			else
 			{
@@ -146,6 +157,16 @@ function redraw()
 			}
 			context.stroke();
 		}
+	}
+	// if we're trying to add an edge, draw it to the mouse
+	if (clickedVertex != -1 && selectedVertex == -1)
+	{
+		context.beginPath();
+		context.strokeStyle = col;
+		context.lineWidth = 4;
+		context.moveTo(G.pos[clickedVertex].x, G.pos[clickedVertex].y);
+		context.lineTo(mx, my);
+		context.stroke();
 	}
 	// draw vertices on top
 	function drawVertex(u, colour)
@@ -206,75 +227,98 @@ function getVertexAt(x, y)
 	return -1;
 }
 
-function onMouseClick(event)
+function onMouseDown(event)
 {
 	const x = event.clientX - canvas.getBoundingClientRect().left;
 	const y = event.clientY - canvas.getBoundingClientRect().top;
-	const vertexClickedOn = getVertexAt(x, y);
-	// didn't click on vertex -> create new vertex
-	if (vertexClickedOn == -1)
+	const vertexAtMouse = getVertexAt(x, y);
+	if (vertexAtMouse == -1)
 	{
-		switch (mode)
-		{
-		case Modes.INSERT:
-			resetHighlights();
-			const addedVertex = addVertex(G, x, y);
-			if (selectedVertex != -1)
-			{
-				addEdge(G, selectedVertex, addedVertex);
-			}
-			break;
-		case Modes.REMOVE:
-			selectedVertex = -1;
-			break;
-		case Modes.MOVE:
-			if (selectedVertex != -1)
-			{
-				G.pos[selectedVertex].x = x;
-				G.pos[selectedVertex].y = y;
-				selectedVertex = -1;
-			}
-			break;
-		}
+		selectedVertex = -1;
 	}
-	else // selected a vertex -> select or create edge between previous selected vertex
+	else
 	{
+		// only remove the selection if we didn't intend to move the vertex
+		if (selectedVertex != vertexAtMouse)
+		{
+			selectedVertex = -1;
+		}
+		clickedVertex = vertexAtMouse;
+	}
+}
+
+function onMouseMove(event)
+{
+	const x = event.clientX - canvas.getBoundingClientRect().left;
+	const y = event.clientY - canvas.getBoundingClientRect().top;
+	// check to see if the mouse is held down from a vertex
+	// since otherwise we don't want to do anything
+	if (clickedVertex != -1)
+	{
+		// we already selected the vertex - this means we want
+		// to drag it around, otherwise we're trying to add an edge
+		if (selectedVertex == clickedVertex)
+		{
+			G.pos[selectedVertex].x = x;
+			G.pos[selectedVertex].y = y;
+		}
+		else // we're trying to add an edge, so draw that
+		{
+			// drawing this edge is handled in redraw()
+			mx = x;
+			my = y;
+		}
+		redraw();
+	}
+}
+
+function onMouseUp(event)
+{
+	const x = event.clientX - canvas.getBoundingClientRect().left;
+	const y = event.clientY - canvas.getBoundingClientRect().top;
+	const vertexAtMouse = getVertexAt(x, y);
+	// didn't click on vertex -> create new vertex
+	if (vertexAtMouse == -1)
+	{
+		if (clickedVertex == -1 && selectedVertex == -1)
+		{
+			resetHighlights();
+			addVertex(G, x, y);
+		}
 		if (selectedVertex != -1)
 		{
+			selectedVertex = -1;
+		}
+	}
+	else // mouse over a vertex -> add edge if dragged to another vertex
+	{
+		if (clickedVertex != -1)
+		{
 			// no self-loops
-			if (vertexClickedOn != selectedVertex)
+			if (vertexAtMouse != clickedVertex)
 			{
-				switch (mode)
-				{
-				case Modes.INSERT:
-					resetHighlights();
-					addEdge(G, selectedVertex, vertexClickedOn);
-					selectedVertex = vertexClickedOn;
-					break;
-				case Modes.REMOVE:
-					resetHighlights();
-					removeEdge(G, selectedVertex, vertexClickedOn);
-					break;
-				}
+				resetHighlights();
+				addEdge(G, clickedVertex, vertexAtMouse);
+				clickedVertex = vertexAtMouse;
 			}
-			else // delete vertex
+			else
 			{
-				if (mode == Modes.REMOVE)
+				if (selectedVertex == clickedVertex)
 				{
-					resetHighlights();
-					removeVertex(G, selectedVertex);
 					selectedVertex = -1;
 				}
-				selectedVertex = -1;
+				else
+				{
+					selectedVertex = clickedVertex;
+				}
 			}
 		}
 		else
 		{
-			selectedVertex = vertexClickedOn;
+			selectedVertex = -1;
 		}
 	}
-	
-	
+	clickedVertex = -1;
 	redraw();
 }
 
