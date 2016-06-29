@@ -1,7 +1,8 @@
 "use strict";
 
 var canvas;
-var context;
+var backContext;
+var animContext;
 var G = [];
 const vertexSize = 16;
 var clickedVertex = -1;
@@ -11,12 +12,6 @@ var selectedEdge = -1;
 var mx = -1;
 var my = -1;
 var directed = false;
-const Modes = {
-	INSERT : "insert",
-	REMOVE : "remove",
-	MOVE : "move"
-};
-var mode = Modes.INSERT;
 var edgeHighlights = {};
 var vertexHighlights = {};
 var lastRandomColourIndex = 0;
@@ -43,12 +38,14 @@ var satisfyCycles;
 
 function initialise()
 {
-	canvas = document.getElementById("myCanvas");
-	context = canvas.getContext("2d");
+	canvas = document.getElementById("anim_canvas");
+	animContext = canvas.getContext("2d");
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mousemove", onMouseMove, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 	canvas.addEventListener("keydown", onKeyDown, false);
+	var backCanvas = document.getElementById("back_canvas");
+	backContext = backCanvas.getContext("2d");
 	
 	satisfyConnected = {
 		str : "connected",
@@ -85,10 +82,39 @@ function initialise()
 	redraw();
 }
 
+function redrawAnims()
+{
+	animContext.clearRect(0, 0, canvas.width, canvas.height);
+	// if we're trying to add an edge, draw it to the mouse
+	if (clickedVertex != -1 && selectedVertex == -1)
+	{
+		animContext.beginPath();
+		animContext.strokeStyle = "#000000";
+		animContext.lineWidth = 4;
+		animContext.moveTo(G.pos[clickedVertex].x, G.pos[clickedVertex].y);
+		animContext.lineTo(mx, my);
+		animContext.stroke();
+	}
+	if (clickedVertex != -1 && clickedVertex == selectedVertex)
+	{
+		for (var i = 0; i < G.list[selectedVertex].length; ++i)
+		{
+			const v = G.list[selectedVertex][i];
+			animContext.beginPath();
+			animContext.strokeStyle = "#000000";
+			animContext.lineWidth = 4;
+			animContext.moveTo(G.pos[selectedVertex].x, G.pos[selectedVertex].y);
+			animContext.lineTo(G.pos[v].x, G.pos[v].y);
+			animContext.stroke();
+		}
+		drawVertex(animContext, selectedVertex, "#555555");
+	}
+}
+
 function redraw()
 {	
-	context.fillStyle = "#DDDDDD";
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	backContext.fillStyle = "#DDDDDD";
+	backContext.fillRect(0, 0, canvas.width, canvas.height);
 	// draw edges
 	for (var u = 0; u < G.list.length; ++u)
 	{
@@ -98,23 +124,24 @@ function redraw()
 			const v = neighbors[i];
 			// so we don't draw each edge twice
 			// and also for easily checking against selected edge
-			if (u < v)
+			// also don't draw the clicked down one - it is drawn in redrawAnims()
+			if (u < v && u != clickedVertex && v != clickedVertex)
 			{
 				if (selectedEdge[0] == u && selectedEdge[1] == v)
 				{
-					context.beginPath();
-					context.strokeStyle = "#AA0000";
-					context.lineWidth = 9;
-					context.moveTo(G.pos[u].x, G.pos[u].y);
-					context.lineTo(G.pos[v].x, G.pos[v].y);
-					context.stroke();
+					backContext.beginPath();
+					backContext.strokeStyle = "#AA0000";
+					backContext.lineWidth = 9;
+					backContext.moveTo(G.pos[u].x, G.pos[u].y);
+					backContext.lineTo(G.pos[v].x, G.pos[v].y);
+					backContext.stroke();
 				}
-				context.beginPath();
-				context.strokeStyle = "#000000";
-				context.lineWidth = 3;
-				context.moveTo(G.pos[u].x, G.pos[u].y);
-				context.lineTo(G.pos[v].x, G.pos[v].y);
-				context.stroke();
+				backContext.beginPath();
+				backContext.strokeStyle = "#000000";
+				backContext.lineWidth = 3;
+				backContext.moveTo(G.pos[u].x, G.pos[u].y);
+				backContext.lineTo(G.pos[v].x, G.pos[v].y);
+				backContext.stroke();
 			}
 		}
 	}
@@ -143,13 +170,13 @@ function redraw()
 			++(edgeHighlightCount[v][u]);
 			
 			
-			context.beginPath();
-			context.strokeStyle = col;
-			context.lineWidth = 4;
-			context.moveTo(G.pos[u].x, G.pos[u].y);
+			backContext.beginPath();
+			backContext.strokeStyle = col;
+			backContext.lineWidth = 4;
+			backContext.moveTo(G.pos[u].x, G.pos[u].y);
 			if (bezierOffset == 0)
 			{
-				context.lineTo(G.pos[v].x, G.pos[v].y);
+				backContext.lineTo(G.pos[v].x, G.pos[v].y);
 			}
 			else
 			{
@@ -165,38 +192,12 @@ function redraw()
 				const normScalar = 3 + bezierOffset * 1.3 + bezierOffset * 0.1 * Math.pow(dist, 0.9);
 				const controlx = midx + normScalar * Math.cos(norm);
 				const controly = midy + normScalar * Math.sin(norm);
-				context.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
+				backContext.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
 			}
-			context.stroke();
+			backContext.stroke();
 		}
 	}
-	// if we're trying to add an edge, draw it to the mouse
-	if (clickedVertex != -1 && selectedVertex == -1)
-	{
-		context.beginPath();
-		context.strokeStyle = col;
-		context.lineWidth = 4;
-		context.moveTo(G.pos[clickedVertex].x, G.pos[clickedVertex].y);
-		context.lineTo(mx, my);
-		context.stroke();
-	}
 	// draw vertices on top
-	function drawVertex(u, colour)
-	{
-		context.beginPath();
-		context.arc(G.pos[u].x, G.pos[u].y, vertexSize, 0, 2*Math.PI);
-		context.fillStyle = colour;
-		context.fill();
-		context.lineWidth = 3;
-		context.strokeStyle = "#000000";
-		context.stroke();
-		context.font = "12px Arial";
-		context.lineWidth = 1;
-		context.textAlign = "center";
-		context.textBaseline = "middle";
-		context.fillStyle = "#000000";
-		context.fillText(u, G.pos[u].x, G.pos[u].y);
-	}
 	function darkenColour(colour, lum)
 	{
 		// assumes 0 <= lum <= 1
@@ -208,15 +209,36 @@ function redraw()
 	}
 	for (var id = 0; id < G.pos.length; ++id)
 	{
-		drawVertex(id, (id == selectedVertex ? "#555555" : "#BBBBBB"));
+		// selected vertex is drawn in redrawAnims
+		if (id != clickedVertex || clickedVertex != selectedVertex)
+		{
+			drawVertex(backContext, id, (id == selectedVertex ? "#555555" : "#BBBBBB"));
+		}
 	}
 	for (var col in vertexHighlights)
 	{
 		for (var i = 0; i < vertexHighlights[col].length; ++i)
 		{
-			drawVertex(vertexHighlights[col][i], darkenColour(col, (vertexHighlights[col][i] == selectedVertex ? 0.4 : 0.8)));
+			drawVertex(backContext, vertexHighlights[col][i], darkenColour(col, (vertexHighlights[col][i] == selectedVertex ? 0.4 : 0.8)));
 		}
 	}
+}
+
+function drawVertex(context, u, colour)
+{
+	context.beginPath();
+	context.arc(G.pos[u].x, G.pos[u].y, vertexSize, 0, 2*Math.PI);
+	context.fillStyle = colour;
+	context.fill();
+	context.lineWidth = 3;
+	context.strokeStyle = "#000000";
+	context.stroke();
+	context.font = "12px Arial";
+	context.lineWidth = 1;
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.fillStyle = "#000000";
+	context.fillText(u, G.pos[u].x, G.pos[u].y);
 }
 
 function resetHighlights()
@@ -299,9 +321,9 @@ function onMouseDown(event)
 		if (selectedVertex != vertexAtMouse)
 		{
 			unselect();
-			redraw();
 		}
 		clickedVertex = vertexAtMouse;
+		redraw();
 	}
 }
 
@@ -326,7 +348,7 @@ function onMouseMove(event)
 			mx = x;
 			my = y;
 		}
-		redraw();
+		redrawAnims();
 	}
 }
 
@@ -394,6 +416,7 @@ function onMouseUp(event)
 	clickedVertex = -1;
 	clickedEdge = -1;
 	redraw();
+	redrawAnims();
 }
 
 function onKeyDown(event)

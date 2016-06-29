@@ -37,11 +37,23 @@
 	</div>
 	<hr>
 	
-	<canvas id="myCanvas" width="640" height="480"
-	style="border:1px solid #d3d3d3;">
-	Your browser does not support the canvas element.
-	</canvas>
-	
+	<div id="canvas_div" style="position:relative; width:640px; height:480px;float:left;">
+		<canvas id="anim_canvas" width="640" height="480"
+			style="border:1px solid #d3d3d3;
+			       position:absolute;
+				   left:0px;
+			       top:0px;
+			       z-index:2;">
+			Your browser does not support the canvas element.
+		</canvas>
+		<canvas id="back_canvas" width="640" height="480"
+			style="position:absolute;
+				   left:0px;
+			       top:0px;
+			       z-index:1;">
+		</canvas>
+	</div>
+	<div style="position:relative;">
 	<textarea id="adj_list_textbox_id" rows="30", cols="32">
 10
 3 1 4 7
@@ -55,6 +67,7 @@
 3 3 7 9
 3 1 5 8
 	</textarea>
+	</div>
 	<p>
 	<textarea id="output_textbox_id" rows="2", cols="112"></textarea>
 	
@@ -91,26 +104,12 @@
 	
 	<h3>Controls:</h3>
 	<ul>
-		<li>
-			Insert Mode:
-			<ul>
-				<li>Left click on a vertex to select it, and create an edge to it if there is a vertex already selected.</li>
-				<li>Click not on a vertex to create a new vertex there. If a vertex is selected, an edge will be created too.</li>
-			</ul>
-		</li>
-		<li>
-			Remove Mode:
-			<ul>
-				<li>Left click on a vertex to select it, and remove an edge from it if there is a vertex already selected.</li>
-				<li>Click on a selected verex to delete it.</li>
-			</ul>
-		</li>
-		<li>
-			Mode Mode:
-			<ul>
-				<li>Left click on a vertex to select it and left click elsewhere to move the selected vertex there.</li>
-			</ul>
-		</li>
+		<li>Click on an empty spot to create a vertex on it.
+		<li>Click and drag a non-selected vertex onto another vertex to join the two with an edge.
+		<li>Click on a vertex to select it.
+		<li>Click and drag a selected vertex to move it.
+		<li>Click on an edge to select it.
+		<li>The remove button will delete the selected vertex or edge.
 	</ul>
 
 
