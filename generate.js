@@ -284,6 +284,38 @@ function randomPermutation(n)
 	return output;
 }
 
+function generateCircularArc(settings)
+{
+	// this is a quick, dirty and  not very good algorithm that just generates arcs
+	// with uniformly random start/end points then generates the intersection graph of it
+	const n = settings.n;
+	var G = createGraph(n);
+	var starts = new Array(n);
+	var len = new Array(n);
+	// for simplicity, circle is [0, 1) not [0, 2pi)
+	for (var i = 0; i < n; ++i)
+	{
+		starts[i] = Math.random();
+		len[i] = Math.random();
+	}
+	for (var i = 0; i < n; ++i)
+	{
+		for (var j = 0; j < n; ++j)
+		{
+			if (i != j)
+			{
+				if ((starts[j] >= starts[i] && starts[j] <= starts[i] + len[i]) ||
+				    (starts[i] >= starts[j] && starts[i] <= starts[j] + len[j]) ||
+				    (starts[i] + len[i] - 1 >= starts[j]) ||
+				    (starts[j] + len[j] - 1 >= starts[i]))
+				{
+					addEdge(G, i, j);
+				}
+			}
+		}
+	}
+	return G;
+}
 
 function generateChordal(settings)
 {

@@ -960,7 +960,10 @@ function menuGenerateClicked()
 			menuGenerate(generateChordal);
 			break;
 		case "random":
-			menuGenerate(generateCompletelyRandom)
+			menuGenerate(generateCompletelyRandom);
+			break;
+		case "circulararc":
+			menuGenerate(generateCircularArc);
 			break;
 	}
 }
@@ -994,6 +997,9 @@ function menuGenerateChanged()
 			break;
 		case "random":
 			helpURL.href = "";
+			break;
+		case "circulararc":
+			helpURL.href = "https://en.wikipedia.org/wiki/Circular-arc_graph";
 			break;
 	}
 }
