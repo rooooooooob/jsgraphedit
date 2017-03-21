@@ -107,6 +107,8 @@ function hasArc(G, u, v)
 function addVertex(G, x, y)
 {
 	G.list.push([]);
+	x = typeof x !== 'undefined' ? x : -1;
+	y = typeof y !== 'undefined' ? y : -1;
 	G.pos.push({x:x, y:y});
 	G.matrix.push(new Array(G.list.length));
 	G.matrix[G.list.length - 1].fill(-1);

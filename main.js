@@ -842,6 +842,41 @@ function runCycleAnalyze()
 	}
 }
 
+function runCircularCompletion()
+{
+	resetHighlights();
+	
+	var paired = circularComplete(G);
+	
+	const oldN = G.list.length;
+	
+	G = paired[0];
+	
+	var outputBox = document.getElementById("output_textbox_id");
+	outputBox.value = "CircularPairs "
+	
+	for (var i = 0; i < paired[1].length; ++i)
+	{
+		const key = randomColours[i % randomColours.length];
+		if (!vertexHighlights[key])
+		{
+			vertexHighlights[key] = [];
+		}
+		const u = paired[1][i][0];
+		const v=  paired[1][i][1];
+		vertexHighlights[key].push(u, v);
+		outputBox.value += ", (" + u + "," + v + ")"
+	}
+	
+	for (var u = oldN; u < G.list.length; ++u)
+	{
+		G.pos[u].x = Math.random() * canvas.width;
+		G.pos[u].y = Math.random() * canvas.height;
+	}
+	
+	redraw();
+}
+
 function menuAlgorithmChanged()
 {
 	switch (document.getElementById("menu_algorithm_select_id").value)
@@ -857,6 +892,8 @@ function menuAlgorithmChanged()
 		case "vertex_colour":
 			break;
 		case "min_cycles":
+			break;
+		case "circular_completion":
 			break;
 	}
 }
@@ -882,6 +919,9 @@ function menuAlgorithmRun()
 			break;
 		case "min_cycles":
 			runCycleAnalyze();
+			break;
+		case "circular_completion":
+			runCircularCompletion();
 			break;
 	}
 }

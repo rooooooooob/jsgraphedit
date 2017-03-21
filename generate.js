@@ -406,3 +406,93 @@ function generateChordal(settings)
 	}
 	return G;
 }
+
+// returns [[u, ~u], [v, ~v]..] a list of circular pairs in G
+function circularPairs(G)
+{
+	const n = G.list.length;
+	var pairs = [];
+	for (var u = 0; u < n; ++u)
+	{
+		// ensure u < v so we don't double-count
+		for (var v = u + 1; v < n; ++v)
+		{
+			// only non-adjacent vertices can be circular pairs to u
+			if (!hasEdge(G, u, v))
+			{
+				var paired = true;
+				// check to make sure v not incident to N[u] and vice versa
+				for (var i = 0; i < G.list[u].length; ++i)
+				{
+					const w = G.list[u][i];
+					if (hasEdge(G, w, v))
+					{
+						paired = false;
+						break;
+					}
+				}
+				if (paired)
+				{
+					for (var i = 0; i < G.list[v].length; ++i)
+					{
+						const w = G.list[v][i];
+						if (hasEdge(G, w, u))
+						{
+							paired = false;
+							break;
+						}
+					}
+				}
+				// (paired == true) ==> the neighborhoods are disjoint
+				// so just check if deg(u) + deg(v) == n - 2 == |V(G \ {u,v})|
+				if (paired && G.list[u].length + G.list[v].length == n - 2)
+				{
+					paired = false;
+				}
+				if (paired)
+				{
+					pairs.push([u, v]);
+					break;
+				}
+			}
+		}
+	}
+	return pairs;
+}
+
+// return: [H, pairs] where H is the circular completeion of G and
+//         pairs = [[u, ~u], [v, ~v]..] is the list of circular pairs in H
+function circularComplete(G)
+{
+	const n = G.list.length;
+	var pairs = circularPairs(G);
+	var paired = new Array(n);
+	paired.fill(false);
+	for (var i = 0; i < pairs.length; ++i)
+	{
+		paired[pairs[i][0]] = true;
+		paired[pairs[i][1]] = true;
+	}
+	var H = cloneGraph(G);
+	for (var u = 0; u < n; ++u)
+	{
+		addEdge(H, u, u);
+	}
+	for (var u = 0; u < n; ++u)
+	{
+		if (!paired[u])
+		{
+			const ubar = addVertex(H);
+			addEdge(H, ubar, ubar);
+			for (var v = 0; v < H.list.length; ++v)
+			{
+				if (!hasEdge(H, u, v))
+				{
+					addEdge(H, ubar, v);
+				}
+			}
+			pairs.push([u, ubar]);
+		}
+	}
+	return [H, pairs];
+}
