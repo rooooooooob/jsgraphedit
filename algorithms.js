@@ -518,3 +518,56 @@ function canonicalFormCycle(C)
 	}
 	return canonicalForm;
 }
+
+
+const EdgeType = {
+	NON_EDGE : 0,
+	INCLUSION : 1,
+	OVERLAP : 2
+};
+
+function computeEdgeTypes(G)
+{
+	const n = G.list.length;
+	var types = new Array(n);
+	for (var i = 0; i < n; ++i)
+	{
+		types[i] = new Array(n);
+		types[i].fill(EdgeType.NON_EDGE);
+		types[i][i] = EdgeType.INCLUSION;
+	}
+	for (var i = 0; i < n; ++i)
+	{
+		for (var j = 0; j < G.list[i].length; ++j)
+		{
+			const x = G.list[i][j];
+			if (i < x)
+			{
+				var u, v;
+				if (G.list[i].length < G.list[x].length)
+				{
+					u = i;
+					v = x;
+				}
+				else
+				{
+					u = x;
+					v = i;
+				}
+				var type = EdgeType.INCLUSION;
+				for (var k = 0; k < G.list[u].length; ++k)
+				{
+					const w = G.list[u][k];
+					if (w != v && !hasEdge(G, v, w))
+					{
+						type = EdgeType.OVERLAP;
+						break;
+					}
+				}
+				types[u][v] = type;
+				types[v][u] = type;
+			}
+		}
+	}
+	return types;
+}

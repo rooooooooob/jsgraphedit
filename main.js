@@ -877,6 +877,33 @@ function runCircularCompletion()
 	redraw();
 }
 
+function runComputeEdgeTypes()
+{
+	resetHighlights();
+	
+	const n = G.list.length;
+	
+	const types = computeEdgeTypes(G);
+	
+	var inclusionEdges = [];
+	
+	for (var u = 0; u < n; ++u)
+	{
+		for (var v = u + 1; v < n; ++v)
+		{
+			if (types[u][v] == EdgeType.INCLUSION)
+			{
+				inclusionEdges.push([u, v]);
+			}
+		}
+	}
+	
+	const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+	edgeHighlights[key] = inclusionEdges;
+	
+	redraw();
+}
+
 function menuAlgorithmChanged()
 {
 	switch (document.getElementById("menu_algorithm_select_id").value)
@@ -894,6 +921,8 @@ function menuAlgorithmChanged()
 		case "min_cycles":
 			break;
 		case "circular_completion":
+			break;
+		case "compute_edge_types":
 			break;
 	}
 }
@@ -922,6 +951,9 @@ function menuAlgorithmRun()
 			break;
 		case "circular_completion":
 			runCircularCompletion();
+			break;
+		case "compute_edge_types":
+			runComputeEdgeTypes();
 			break;
 	}
 }
