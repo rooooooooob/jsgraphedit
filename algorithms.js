@@ -571,3 +571,63 @@ function computeEdgeTypes(G)
 	}
 	return types;
 }
+
+function removeTrueTwinsAndUniversal(G)
+{
+	const types = computeEdgeTypes(G);
+	var H = createGraph(0);
+	var GtoH = new Array(G.list.length);
+	// remove true twins/universal vertices from G to make H (vertices only)
+	// and create a mapping GtoH that is -1 if the vertex was removed
+	// (this is the same for true twins mapping it to the kept twin
+	// as adding in such an edge would happen anyway from the kept twin)
+	for (var u = 0; u < G.list.length; ++u)
+	{
+		// universal?
+		if (G.list[u].length >= G.list.length - 1)
+		{
+			GtoH[u] = -1;
+			continue;
+		}
+		var smallestTwin = u;
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			// true twin?
+			const v = G.list[u][i];
+			if (types[u][v] == EdgeType.INCLUSION &&
+			    G.list[u].length == G.list[v].length &&
+			    v < smallestTwin)
+			{
+				smallestTwin = v;
+			}
+		}
+		// keep only the smallest (by index) vertex among its twins
+		if (u != smallestTwin)
+		{
+			GtoH[u] = -1;
+			continue;
+		}
+		// we are not a true twin or universal vertex!
+		GtoH[u] = addVertex(H);
+		H.pos[GtoH[u]].x = G.pos[u].x;
+		H.pos[GtoH[u]].y = G.pos[u].y;
+	}
+	// now add the edges into H corresponding to G
+	for (var uG = 0; uG < G.list.length; ++uG)
+	{
+		const uH = GtoH[uG];
+		if (uH != -1)
+		{
+			for (var i = 0; i < G.list[uG].length; ++i)
+			{
+				const vG = G.list[uG][i];
+				const vH = GtoH[vG];
+				if (vH != -1)
+				{
+					addEdge(H, uH, vH);
+				}
+			}
+		}
+	}
+	return H;
+}

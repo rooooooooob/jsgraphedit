@@ -904,6 +904,15 @@ function runComputeEdgeTypes()
 	redraw();
 }
 
+function runRemoveTTU()
+{
+	resetHighlights();
+	
+	G = removeTrueTwinsAndUniversal(G);
+	
+	redraw();
+}
+
 function menuAlgorithmChanged()
 {
 	switch (document.getElementById("menu_algorithm_select_id").value)
@@ -923,6 +932,8 @@ function menuAlgorithmChanged()
 		case "circular_completion":
 			break;
 		case "compute_edge_types":
+			break;
+		case "remove_ttu":
 			break;
 	}
 }
@@ -954,6 +965,9 @@ function menuAlgorithmRun()
 			break;
 		case "compute_edge_types":
 			runComputeEdgeTypes();
+			break;
+		case "remove_ttu":
+			runRemoveTTU();
 			break;
 	}
 }
