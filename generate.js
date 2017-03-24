@@ -445,7 +445,7 @@ function circularPairs(G)
 				}
 				// (paired == true) ==> the neighborhoods are disjoint
 				// so just check if deg(u) + deg(v) == n - 2 == |V(G \ {u,v})|
-				if (paired && G.list[u].length + G.list[v].length == n - 2)
+				if (G.list[u].length + G.list[v].length != n - 2)
 				{
 					paired = false;
 				}
