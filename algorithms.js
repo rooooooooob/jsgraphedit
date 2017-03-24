@@ -12,7 +12,7 @@ function wholeEdge(u , v)
 
 function dfs(G, start, processEdge)
 {
-	var order = [processEdge(null, start)];
+	var order = [processEdge(-1, start)];
 	var visited = new Array(G.list.length);
 	visited.fill(false);
 	visited[start] = true;
@@ -33,7 +33,7 @@ function dfsComponents(G, processEdge)
 		if (!visited[i])
 		{
 			visited[i] = true;
-			var compOrder = [processEdge(null, i)];
+			var compOrder = [processEdge(-1, i)];
 			dfsInternal(G, i, compOrder, visited, processEdge);
 			order.push(compOrder);
 		}
@@ -94,7 +94,7 @@ function bfsInternal(G, start, order, visited, processEdge)
 		visited[v] = true;
 		order.push(processEdge(u, v));
 	}
-	visit(null, start);
+	visit(-1, start);
 	while (queue.length() > 0)
 	{
 		const u = queue.pop();
@@ -490,7 +490,7 @@ function canonicalFormCycle(C)
 {
 	// compare cycles in a canonical form by rotating to the smallest element
 	// with the additional requirement that the 2nd element be smaller than the
-	// 2nd to prevent each cycle being stored twice
+	// last to prevent each cycle being stored twice
 	var minIndex = 0;
 	const k = C.length;
 	for (var i = 1; i < k; ++i)
@@ -630,4 +630,118 @@ function removeTrueTwinsAndUniversal(G)
 		}
 	}
 	return H;
+}
+
+// return: [G's circlar completion, types, z, P = [x1, ..., xk], Q = [y1, ..., yk]]
+function findAnchoredInvertiblePair(G)
+{
+	const completion = circularComplete(removeTrueTwinsAndUniversal(G));
+	const H = completion[0];
+	const pairs = completion[1];
+	const types = computeEdgeTypes(H);
+	const n = H.list.length;
+	// find z of min degree
+	var z = 0;
+	for (var i = 1; i < n; ++i)
+	{
+		if (H.list[i].length < H.list[z].length)
+		{
+			z = i;
+		}
+	}
+	// search uz-components
+	var gamma = new Array(n); // gamma[u][v] looks up which uz-component v is in
+	var uzBFSPar = new Array(n); // uzBFSPar[u][v] looks up v's parent in the BFS-tree of Xuz
+	for (var i = 0; i < n; ++i)
+	{
+		gamma[i] = new Array(n);
+		//gamma[i].fill(-1);
+		uzBFSPar[i] = new Array(n);
+		//uzBFSPar[i].fill(-1);
+	}
+	var uzComps = new Array(n); // uzComps[u] = uz-components
+	var uzCompOffset = new Array(n); // uzCompOffset[u] == u_1 and u_j = u_1 + j
+	//uzCompOffset.fill(-1);
+	//uzComps.fill(0);
+	var uzCompTotal = 0;
+	for (var u = 0; u < n; ++u) // u in H
+	{
+		if (types[u][z] != EdgeType.INCLUSION)
+		{
+			var HtoXuz = new Array(n);
+			HtoXuz.fill(-1);
+			var XuztoH = [];
+			var Xuz = createGraph(0);
+			for (var x = 0; x < n; ++x) // x in H
+			{
+				if (types[u][x] != EdgeType.INCLUSION && types[z][x] != EdgeType.INCLUSION)
+				{
+					HtoXuz[x] = addVertex(Xuz);
+					XuztoH.push(x);
+				}
+			}
+			// to find uz-components we can just look at H[A(z) int A(u)]
+			// then remove inclusion edges - since all vertices in this induced
+			// subgraph overlap or are on-adjacent, then if we remove all overlap
+			// edges where both endpoints overlap z or u, we are fine and can follow it
+			for (var x = 0; x < Xuz.list.length; ++ x) // x in Xuz
+			{
+				for (var i = 0; i < Xuz.list[x].length; ++i)
+				{
+					const y = Xuz.list[x][i]; // y in Xuz
+					const xH = XuztoH[x];
+					const yH = XuztoH[y];
+					const zOverlapsXY = types[z][xH] == EdgeType.OVERLAP &&
+					                    types[z][yH] == EdgeType.OVERLAP;
+					const uOverlapsXY = types[u][xH] == EdgeType.OVERLAP &&
+					                    types[u][yH] == EdgeType.OVERLAP;
+					if (types[xH][yH] == EdgeType.OVERLAP && (zOverlapsXY || uOverlapsXY))
+					{
+						removeEdge(Xuz, x, y);
+					}
+				}
+			}
+			const uzComponents = bfsComponents(Xuz, wholeEdge);
+			uzComps[u] = bfsComponents(Xuz, wholeEdge);
+			uzCompOffset[u] = uzCompTotal;
+			uzCompTotal += uzComps[u].length;
+			for (var i = 0; i < uzComps[u].length; ++i)
+			{
+				for (var j = 0; j < uzComps[u][i].length; ++j) 
+				{
+					const x = uzComps[u][i][j][1]; // x in Xuz
+					const xH = XuztoH[x];
+					gamma[u][xH] = i;
+					const prev = uzComps[u][i][j][0];
+					const why = prev == -1 ? prev : XuztoH[prev];
+					uzBFSPar[u][xH] = why;
+				}
+			}
+		}
+	}
+	// construct knotting graph
+	var K = createGraph(uzCompTotal);
+	for (var u = 0; u < n; ++u) // u in H
+	{
+		if (types[u][z] != EdgeType.INCLUSION)
+		{
+			for (var v = 0; v < n; ++v)
+			{
+				// u, v in A(z), uv non-edge or overlap
+				if (types[v][z] != EdgeType.INCLUSION && types[u][v] != EdgeType.INCLUSION)
+				{
+					const ui = uzCompOffset[u] + gamma[u][v];
+					const vj = uzCompOffset[v] + gamma[v][u];
+					addEdge(K, ui, vj);
+				}
+			}
+		}
+	}
+	// find odd-cycle in K
+	var visited = new Array(K.list.length);
+	visited.fill(false);
+	// reconstruct paths
+	var P = [];
+	var Q = [];
+	return [K, types, z, P, Q];
 }

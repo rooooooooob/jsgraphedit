@@ -758,7 +758,7 @@ function runDFS()
 			for (var j = 0; j < dfsTree.length; ++j)
 			{
 				visited[dfsTree[j][1]] = true;
-				// don't draw first edge, since it's [null, start]
+				// don't draw first edge, since it's [-1, start]
 				if (j > 0)
 				{
 					edgeHighlights[key].push(dfsTree[j]);
@@ -913,6 +913,37 @@ function runRemoveTTU()
 	redraw();
 }
 
+function runFindAnchoredInvertiblePair()
+{
+	// todo: draw aop in highlights?
+	const aop = findAnchoredInvertiblePair(G);
+	const completion = aop[0];
+	const types = aop[1];
+	const z = aop[2];
+	const P = aop[3];
+	const Q = aop[4];
+	
+	var outputBox = document.getElementById("output_textbox_id");
+	outputBox.value = "z = " + z + "\n";
+	
+	function printPath(name, path)
+	{	outputBox.value += name + ": ";
+		for (var i = 0; i < path.length; ++path)
+		{
+			outputBox.value += path[i] + ", ";
+		}
+		outputBox.value += "\n";
+	}
+	printPath("P", P);
+	printPath("Q", Q);
+	
+	G = completion;
+	
+	randomizeVertexPositions();
+	
+	redraw();
+}
+
 function menuAlgorithmChanged()
 {
 	switch (document.getElementById("menu_algorithm_select_id").value)
@@ -934,6 +965,8 @@ function menuAlgorithmChanged()
 		case "compute_edge_types":
 			break;
 		case "remove_ttu":
+			break;
+		case "find_anchored_invertible_pair":
 			break;
 	}
 }
@@ -968,6 +1001,9 @@ function menuAlgorithmRun()
 			break;
 		case "remove_ttu":
 			runRemoveTTU();
+			break;
+		case "find_anchored_invertible_pair":
+			runFindAnchoredInvertiblePair();
 			break;
 	}
 }
