@@ -684,20 +684,33 @@ function findAnchoredInvertiblePair(G)
 			// then remove inclusion edges - since all vertices in this induced
 			// subgraph overlap or are on-adjacent, then if we remove all overlap
 			// edges where both endpoints overlap z or u, we are fine and can follow it
-			for (var x = 0; x < Xuz.list.length; ++ x) // x in Xuz
+			for (var x = 0; x < H.list.length; ++ x) // x in H
 			{
-				for (var i = 0; i < Xuz.list[x].length; ++i)
+				const xU = HtoXuz[x];
+				if (xU != -1) // x in Xuz?
 				{
-					const y = Xuz.list[x][i]; // y in Xuz
-					const xH = XuztoH[x];
-					const yH = XuztoH[y];
-					const zOverlapsXY = types[z][xH] == EdgeType.OVERLAP &&
-					                    types[z][yH] == EdgeType.OVERLAP;
-					const uOverlapsXY = types[u][xH] == EdgeType.OVERLAP &&
-					                    types[u][yH] == EdgeType.OVERLAP;
-					if (types[xH][yH] == EdgeType.OVERLAP && (zOverlapsXY || uOverlapsXY))
+					for (var i = 0; i < H.list[x].length; ++i)
 					{
-						removeEdge(Xuz, x, y);
+						const y = H.list[x][i]; // y in H
+						const yU = HtoXuz[y];
+						if (yU != -1) // y in Xuz?
+						{
+							const zOverlapsXY = types[z][x] == EdgeType.OVERLAP &&
+												types[z][y] == EdgeType.OVERLAP;
+							const uOverlapsXY = types[u][x] == EdgeType.OVERLAP &&
+												types[u][y] == EdgeType.OVERLAP;
+							const noInclusion = types[u][x] != EdgeType.INCLUSION &&
+							                    types[u][y] != EdgeType.INCLUSION &&
+							                    types[z][x] != EdgeType.INCLUSION &&
+							                    types[z][y] != EdgeType.INCLUSION;
+							// xy avoids z if xz, yz not inclusion and if xz, yz
+							// both overlap, then xy inclusion
+							if (noInclusion && (types[x][y] == EdgeType.INCLUSION ||
+							    (!zOverlapsXY && !uOverlapsXY)))
+							{
+								addEdge(Xuz, xU, yU);
+							}
+						}
 					}
 				}
 			}
@@ -712,9 +725,8 @@ function findAnchoredInvertiblePair(G)
 					const x = uzComps[u][i][j][1]; // x in Xuz
 					const xH = XuztoH[x];
 					gamma[u][xH] = i;
-					const prev = uzComps[u][i][j][0];
-					const why = prev == -1 ? prev : XuztoH[prev];
-					uzBFSPar[u][xH] = why;
+					const prev = uzComps[u][i][j][0]; // prev in Xuz
+					uzBFSPar[u][xH] = prev == -1 ? -1 : XuztoH[prev];
 				}
 			}
 		}
