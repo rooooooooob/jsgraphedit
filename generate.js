@@ -474,19 +474,15 @@ function circularComplete(G)
 		paired[pairs[i][1]] = true;
 	}
 	var H = cloneGraph(G);
-	for (var u = 0; u < n; ++u)
-	{
-		addEdge(H, u, u);
-	}
-	for (var u = 0; u < n; ++u)
+	for (var u = 0; u < n; ++u) // use old n
 	{
 		if (!paired[u])
 		{
 			const ubar = addVertex(H);
 			addEdge(H, ubar, ubar);
-			for (var v = 0; v < H.list.length; ++v)
+			for (var v = 0; v < H.list.length - 1; ++v) // new n except ubar
 			{
-				if (!hasEdge(H, u, v))
+				if (u != v && !hasEdge(H, u, v))
 				{
 					addEdge(H, ubar, v);
 				}
