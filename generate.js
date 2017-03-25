@@ -479,7 +479,6 @@ function circularComplete(G)
 		if (!paired[u])
 		{
 			const ubar = addVertex(H);
-			addEdge(H, ubar, ubar);
 			for (var v = 0; v < H.list.length - 1; ++v) // new n except ubar
 			{
 				if (u != v && !hasEdge(H, u, v))

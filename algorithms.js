@@ -737,7 +737,7 @@ function findAnchoredInvertiblePair(G)
 	{
 		if (types[u][z] != EdgeType.INCLUSION)
 		{
-			for (var v = 0; v < n; ++v)
+			for (var v = u + 1; v < n; ++v)
 			{
 				// u, v in A(z), uv non-edge or overlap
 				if (types[v][z] != EdgeType.INCLUSION && types[u][v] != EdgeType.INCLUSION)
@@ -750,8 +750,7 @@ function findAnchoredInvertiblePair(G)
 		}
 	}
 	// find odd-cycle in K
-	var visited = new Array(K.list.length);
-	visited.fill(false);
+	
 	// reconstruct paths
 	var P = [];
 	var Q = [];
