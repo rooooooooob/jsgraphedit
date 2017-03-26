@@ -846,7 +846,7 @@ function runCircularCompletion()
 {
 	resetHighlights();
 	
-	var paired = circularComplete(G);
+	var paired = circularComplete(removeTrueTwinsAndUniversal(G));
 	
 	const oldN = G.list.length;
 	

@@ -411,6 +411,7 @@ function generateChordal(settings)
 function circularPairs(G)
 {
 	const n = G.list.length;
+	const type = computeEdgeTypes(G);
 	var pairs = [];
 	for (var u = 0; u < n; ++u)
 	{
@@ -421,11 +422,9 @@ function circularPairs(G)
 			if (!hasEdge(G, u, v))
 			{
 				var paired = true;
-				// check to make sure v not incident to N[u] and vice versa
-				for (var i = 0; i < G.list[u].length; ++i)
+				for (var w = 0; w < n; ++w)
 				{
-					const w = G.list[u][i];
-					if (hasEdge(G, w, v))
+					if (w != u && !hasEdge(G, u, w) && type[w][v] != EdgeType.INCLUSION)
 					{
 						paired = false;
 						break;
@@ -433,21 +432,14 @@ function circularPairs(G)
 				}
 				if (paired)
 				{
-					for (var i = 0; i < G.list[v].length; ++i)
+					for (var w = 0; w < n; ++w)
 					{
-						const w = G.list[v][i];
-						if (hasEdge(G, w, u))
+						if (w != v && !hasEdge(G, v, w) && type[w][u] != EdgeType.INCLUSION)
 						{
 							paired = false;
 							break;
 						}
 					}
-				}
-				// (paired == true) ==> the neighborhoods are disjoint
-				// so just check if deg(u) + deg(v) == n - 2 == |V(G \ {u,v})|
-				if (G.list[u].length + G.list[v].length != n - 2)
-				{
-					paired = false;
 				}
 				if (paired)
 				{
@@ -474,19 +466,32 @@ function circularComplete(G)
 		paired[pairs[i][1]] = true;
 	}
 	var H = cloneGraph(G);
-	for (var u = 0; u < n; ++u) // use old n
+	for (var v = 0; v < n; ++v) // use old n
 	{
-		if (!paired[u])
+		if (!paired[v])
 		{
-			const ubar = addVertex(H);
-			for (var v = 0; v < H.list.length - 1; ++v) // new n except ubar
+			const vbar = addVertex(H);
+			for (var u = 0; u < H.list.length - 1; ++u) // new n except ubar
 			{
+				// join vbar, u if N[u] not a subset of N[v]
 				if (u != v && !hasEdge(H, u, v))
 				{
-					addEdge(H, ubar, v);
+					addEdge(H, vbar, u);
+				}
+				else
+				{
+					for (var i = 0; i < H.list[u].length; ++i)
+					{
+						const w = H.list[u][i];
+						if (!hasEdge(H, w, v))
+						{
+							addEdge(H, vbar, u);
+							break;
+						}
+					}
 				}
 			}
-			pairs.push([u, ubar]);
+			pairs.push([v, vbar]);
 		}
 	}
 	return [H, pairs];
