@@ -95,6 +95,7 @@ function redrawAnims()
 		animContext.lineTo(mx, my);
 		animContext.stroke();
 	}
+	// if we're moving a vertex, draw all its edges
 	if (clickedVertex != -1 && clickedVertex == selectedVertex)
 	{
 		for (var i = 0; i < G.list[selectedVertex].length; ++i)
@@ -122,10 +123,11 @@ function redraw()
 		for (var i = 0; i < neighbors.length; ++i)
 		{
 			const v = neighbors[i];
-			// so we don't draw each edge twice
+			// u < v so we don't draw each edge twice
 			// and also for easily checking against selected edge
 			// also don't draw the clicked down one - it is drawn in redrawAnims()
-			if (u < v && u != clickedVertex && v != clickedVertex)
+			// but only if we're moving it!!!			
+			if (u < v && (u != clickedVertex && v != clickedVertex) || selectedVertex == -1)
 			{
 				if (selectedEdge[0] == u && selectedEdge[1] == v)
 				{
