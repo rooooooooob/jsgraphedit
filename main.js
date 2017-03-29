@@ -917,6 +917,8 @@ function runRemoveTTU()
 
 function runFindAnchoredInvertiblePair()
 {
+	resetHighlights();
+	
 	// todo: draw aop in highlights?
 	const aop = findAnchoredInvertiblePair(G);
 	const completion = aop[0];
@@ -942,6 +944,18 @@ function runFindAnchoredInvertiblePair()
 	G = completion;
 	
 	randomizeVertexPositions();
+	
+	const oddCycle = aop[5];
+	if (oddCycle.length > 0)
+	{
+		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+		var oddCycleEdges = [];
+		for (var i = 0; i < oddCycle.length; ++i)
+		{
+			oddCycleEdges.push([oddCycle[i], oddCycle[(i + 1) % oddCycle.length]]);
+		}
+		edgeHighlights[key] = oddCycleEdges;
+	}
 	
 	redraw();
 }

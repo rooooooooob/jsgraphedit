@@ -750,9 +750,69 @@ function findAnchoredInvertiblePair(G)
 		}
 	}
 	// find odd-cycle in K
+	var oddCycle = [];
+	for (var root = 0; root < K.list.length && oddCycle.length == 0; ++root)
+	{
+		var queue = new CircularQueue(K.list.length);
+		var visited = new Array(K.list.length);
+		visited.fill(false);
+		var prev = new Array(K.list.length);
+		var col = new Array(K.list.length);
+		function visit(u, v)
+		{
+			queue.push(v);
+			visited[v] = true;
+			prev[v] = u;
+			col[v] = u == -1 || col[u] == 1 ? 0 : 1; // greedy 2-colour it
+		}
+		visit(-1, root);
+		while (queue.length() > 0 && oddCycle.length == 0)
+		{
+			const u = queue.pop();
+			for (var i = 0; i < K.list[u].length; ++i)
+			{
+				const v = K.list[u][i];
+				if (visited[v])
+				{
+					if (col[u] == col[v]) // odd cycle
+					{
+						// mark all visited vertices in the u->root walk
+						// then walk up the v->root walk until we hit a visited verted in the u->root
+						// walk to determine the first common ancester, so that our cycle is an odd cycle
+						// and not just an odd walk
+						var urVisited = new Array(K.list.length);
+						urVisited.fill(false);
+						var i = u;
+						while (i != -1)
+						{
+							urVisited[i] = true;
+							oddCycle.push(i);
+							i = prev[i];
+						}
+						i = v;
+						var vrPath = [v];
+						var k = oddCycle.length;
+						while (!urVisited[i])
+						{
+							vrPath.push(prev[i]);
+							i = prev[i];
+							--k;
+						}
+						oddCycle.pop(k);
+						oddCycle = oddCycle.concat(vrPath.reverse());
+						break;
+					}
+				}
+				else
+				{
+					visit(u, v);
+				}
+			}
+		}
+	}
 	
 	// reconstruct paths
 	var P = [];
 	var Q = [];
-	return [K, types, z, P, Q];
+	return [K, types, z, P, Q, oddCycle];
 }
