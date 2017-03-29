@@ -632,6 +632,38 @@ function removeTrueTwinsAndUniversal(G)
 	return H;
 }
 
+// prev[u] shall be defined to u's BFS parent, or -1 if u is the root
+// finds a u->v walk through the BFS tree as a return
+function recoverPathFromBFSTree(prev, u, v)
+{
+	// mark all visited vertices in the u->root walk
+	// then walk up the v->root walk until we hit a visited verted in the u->root
+	// walk to determine the first common ancester, so that our cycle is an odd cycle
+	// and not just an odd walk
+	var urVisited = new Array(prev.length);
+	urVisited.fill(false);
+	var i = u;
+	var path = [];
+	while (i != -1)
+	{
+		urVisited[i] = true;
+		path.push(i);
+		i = prev[i];
+	}
+	i = v;
+	var vrPath = [v];
+	var k = path.length;
+	while (!urVisited[i])
+	{
+		vrPath.push(prev[i]);
+		i = prev[i];
+		--k;
+	}
+	path.pop(k);
+	path = path.concat(vrPath.reverse());
+	return path;
+}
+
 // return: [G's circlar completion, types, z, P = [x1, ..., xk], Q = [y1, ..., yk]]
 function findAnchoredInvertiblePair(G)
 {
@@ -640,6 +672,7 @@ function findAnchoredInvertiblePair(G)
 	const pairs = completion[1];
 	const types = computeEdgeTypes(H);
 	const n = H.list.length;
+	
 	// find z of min degree
 	var z = 0;
 	for (var i = 1; i < n; ++i)
@@ -649,6 +682,7 @@ function findAnchoredInvertiblePair(G)
 			z = i;
 		}
 	}
+	
 	// search uz-components
 	var gamma = new Array(n); // gamma[u][v] looks up which uz-component v is in
 	var uzBFSPar = new Array(n); // uzBFSPar[u][v] looks up v's parent in the BFS-tree of Xuz
@@ -731,6 +765,7 @@ function findAnchoredInvertiblePair(G)
 			}
 		}
 	}
+	
 	// construct knotting graph
 	var K = createGraph(uzCompTotal);
 	for (var u = 0; u < n; ++u) // u in H
@@ -749,6 +784,7 @@ function findAnchoredInvertiblePair(G)
 			}
 		}
 	}
+	
 	// find odd-cycle in K
 	var oddCycle = [];
 	for (var root = 0; root < K.list.length && oddCycle.length == 0; ++root)
@@ -776,30 +812,7 @@ function findAnchoredInvertiblePair(G)
 				{
 					if (col[u] == col[v]) // odd cycle
 					{
-						// mark all visited vertices in the u->root walk
-						// then walk up the v->root walk until we hit a visited verted in the u->root
-						// walk to determine the first common ancester, so that our cycle is an odd cycle
-						// and not just an odd walk
-						var urVisited = new Array(K.list.length);
-						urVisited.fill(false);
-						var i = u;
-						while (i != -1)
-						{
-							urVisited[i] = true;
-							oddCycle.push(i);
-							i = prev[i];
-						}
-						i = v;
-						var vrPath = [v];
-						var k = oddCycle.length;
-						while (!urVisited[i])
-						{
-							vrPath.push(prev[i]);
-							i = prev[i];
-							--k;
-						}
-						oddCycle.pop(k);
-						oddCycle = oddCycle.concat(vrPath.reverse());
+						oddCycle = recoverPathFromBFSTree(prev, u, v);
 						break;
 					}
 				}
@@ -814,5 +827,25 @@ function findAnchoredInvertiblePair(G)
 	// reconstruct paths
 	var P = [];
 	var Q = [];
+	for (var i = 0; i < oddCycle.length - 2; ++i)// uzBFSPar[u][v] looks up v's parent in the BFS-tree of Xuz
+	{
+		const v = oddCycle[0];
+		const ui = oddCycle[1];
+		const w = oddCycle[2];
+		const Pi = recoverPathFromBFSTree(uzBFSPar[ui], v, w);
+		var uiPath = new Array(Pi.length);
+		uiPath.fill(ui);
+		if (i % 2 == 0)
+		{
+			P = P.concat(Pi);
+			Q = Q.concat(uiPath);
+		}
+		else
+		{
+			P = P.concat(uiPath);
+			Q = Q.concat(Pi);
+		}
+	}
+
 	return [K, types, z, P, Q, oddCycle];
 }
