@@ -915,12 +915,12 @@ function runRemoveTTU()
 	redraw();
 }
 
-function runFindAnchoredInvertiblePair()
+function runFindAnchoredInvertiblePair(useAlternate)
 {
 	resetHighlights();
 
 	// todo: draw aop in highlights?
-	const aop = findAnchoredInvertiblePair(G);
+	const aop = useAlternate ? findAnchoredInvertiblePairAlt(G) : findAnchoredInvertiblePair(G);
 	const completion = aop[0];
 	const types = aop[1];
 	const z = aop[2];
@@ -941,7 +941,7 @@ function runFindAnchoredInvertiblePair()
 	printPath("P", P);
 	printPath("Q", Q);
 	
-	G = completion;
+	G = aop[5];//completion;
 	
 	randomizeVertexPositions();
 	
@@ -999,6 +999,8 @@ function menuAlgorithmChanged()
 			break;
 		case "find_anchored_invertible_pair":
 			break;
+		case "find_anchored_invertible_pair2":
+			break;
 	}
 }
 
@@ -1034,7 +1036,10 @@ function menuAlgorithmRun()
 			runRemoveTTU();
 			break;
 		case "find_anchored_invertible_pair":
-			runFindAnchoredInvertiblePair();
+			runFindAnchoredInvertiblePair(false);
+			break;
+		case "find_anchored_invertible_pair2":
+			runFindAnchoredInvertiblePair(true);
 			break;
 	}
 }

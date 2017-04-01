@@ -664,6 +664,26 @@ function recoverPathFromBFSTree(prev, u, v)
 	return path;
 }
 
+// assumes x-y is an edge
+function avoidsVertex(types, z, x, y)
+{
+	// xy avoids z if xz, yz not inclusion and if xz, yz
+	// both overlap, then xy inclusion
+	//assert(types[x][y] != EdgeType.NON_EDGE);
+	const zOverlapsXY = types[z][x] == EdgeType.OVERLAP &&
+						types[z][y] == EdgeType.OVERLAP;
+	const noInclusion = types[z][x] != EdgeType.INCLUSION &&
+						types[z][y] != EdgeType.INCLUSION;
+	return noInclusion && (types[x][y] == EdgeType.INCLUSION || !zOverlapsXY)
+}
+function avoidsEdge(types, x_1, x_2, y_1, y_2)
+{
+	return avoidsVertex(types, x_1, y_1, y_2) &&
+		   avoidsVertex(types, x_2, y_1, y_2) &&
+		   avoidsVertex(types, y_1, x_1, x_2) &&
+		   avoidsVertex(types, y_2, x_1, x_2);
+}
+
 // return: [G's circlar completion, types, z, P = [x1, ..., xk], Q = [y1, ..., yk]]
 function findAnchoredInvertiblePair(G)
 {
@@ -730,18 +750,7 @@ function findAnchoredInvertiblePair(G)
 						const yU = HtoXuz[y];
 						if (yU != -1) // y in Xuz?
 						{
-							const zOverlapsXY = types[z][x] == EdgeType.OVERLAP &&
-												types[z][y] == EdgeType.OVERLAP;
-							const uOverlapsXY = types[u][x] == EdgeType.OVERLAP &&
-												types[u][y] == EdgeType.OVERLAP;
-							const noInclusion = types[u][x] != EdgeType.INCLUSION &&
-							                    types[u][y] != EdgeType.INCLUSION &&
-							                    types[z][x] != EdgeType.INCLUSION &&
-							                    types[z][y] != EdgeType.INCLUSION;
-							// xy avoids z if xz, yz not inclusion and if xz, yz
-							// both overlap, then xy inclusion
-							if (noInclusion && (types[x][y] == EdgeType.INCLUSION ||
-							    (!zOverlapsXY && !uOverlapsXY)))
+							if (avoidsVertex(types, z, x, y) && avoidsVertex(types, u, x, y))
 							{
 								addEdge(Xuz, xU, yU);
 							}
@@ -850,4 +859,123 @@ function findAnchoredInvertiblePair(G)
 	}
 
 	return [H, types, z, P, Q, K, oddCycle];
+}
+
+function findAnchoredInvertiblePairAlt(G)
+{
+	const completion = circularComplete(removeTrueTwinsAndUniversal(G));
+	const H = completion[0];
+	const pairs = completion[1];
+	const types = computeEdgeTypes(H);
+	const n = H.list.length;
+	
+	// find z of min degree
+	var z = 0;
+	for (var i = 1; i < n; ++i)
+	{
+		if (H.list[i].length < H.list[z].length)
+		{
+			z = i;
+		}
+	}
+	
+	var K = createGraph(0);
+	var KtoH = []; // KtoH[x] = [u, v] is x is the (u, v)
+	var HtoK = new Array(n);
+	for (var i = 0; i < n; ++i)
+	{
+		HtoK[i] = new Array(n);
+		//HtoK[i].fill(-1);
+	}
+	for (var u = 0; u < n; ++u) // u in H
+	{
+		if (types[u][z] != EdgeType.INCLUSION)
+		{
+			for (var v = 0; v < n; ++v)
+			{
+				if (types[v][z] != EdgeType.INCLUSION && types[u][v] != EdgeType.INCLUSION)
+				{
+					HtoK[u][v] = addVertex(K);
+					KtoH.push([u, v]);
+					console.log("(" + u + "," + v + " );  ");
+				}
+			}
+		}
+	}
+	const nK = K.list.length;
+	// add edges into delta-implication class graph
+	function linkPair(x_1, y_1, x_2, y_2)
+	{
+		if (avoidsVertex(types, z, x_1, x_2) && avoidsVertex(types, z, y_1, y_2)
+			&& avoidsEdge(types, x_1, x_2, y_1, y_2))
+		{
+			addEdge(K, HtoK[x_1][y_1], HtoK[x_2][y_2]);
+		}
+	}
+	for (var uv = 0; uv < nK; ++uv) // uv in K
+	{
+		const u = KtoH[uv][0]; // u in H
+		const v = KtoH[uv][1]; // v in H
+		for (var i = 0; i < H.list[u].length; ++i)
+		{
+			const x = H.list[u][i];
+			linkPair(u, v, x, v);
+			for (var j = 0; j < H.list[v].length; ++j)
+			{
+				const y = H.list[v][j];
+				linkPair(u, v, u, y);
+				linkPair(u, v, x, y);
+			}
+		}
+	}
+	var implicationClass = new Array(nK); // implicationClass[x] looks up which implication class x = (u,v) is in. We refer to the root of the BFS of each as the class id
+	implicationClass.fill(-1);
+	var prev = new Array(K.list.length);
+	var shortestImplPath = [];
+	/*for (var root = 0; root < nK && shortestImplPath.length == 0; ++root)
+	{
+		if (implicationClass[root] == -1)
+		{
+			var queue = new CircularQueue(K.list.length);
+			function visit(y, x)
+			{
+				queue.push(x);
+				implicationClass[x] = root;
+				prev[x] = y;
+				const u = KtoH[x][0]; // u in H
+				const v = KtoH[x][1]; // v in H
+				const vu = HtoK[v][u];
+				if (implicationClass[vu] == root) // path between them
+				{
+					const implPath = recoverPathFromBFSTree(prev, x, vu);
+					if (implPath.length < shortestImplPath.length)
+					{
+						shortestImplPath = implPath;
+					}
+					
+				}
+			}
+			visit(-1, root);
+			while (queue.length() > 0 && shortestImplPath.length == 0)
+			{
+				const x = queue.pop();
+				for (var i = 0; i < K.list[u].length; ++i)
+				{
+					const y = K.list[u][i];
+					if (implicationClass[y] == -1)
+					{
+						visit(u, v);
+					}
+				}
+			}
+		}
+	}*/
+	var P = [];
+	var Q = [];
+	for (var i = 0; i < shortestImplPath.length; ++i)
+	{
+		P.push(KtoH[shortestImplPath[i]][0]);
+		Q.push(KtoH[shortestImplPath[i]][1]);
+	}
+	return [H, types, z, P, Q, K];
 }
