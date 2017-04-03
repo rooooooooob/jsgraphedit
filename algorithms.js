@@ -932,11 +932,11 @@ function findAnchoredInvertiblePairAlt(G)
 	implicationClass.fill(-1);
 	var prev = new Array(K.list.length);
 	var shortestImplPath = [];
-	/*for (var root = 0; root < nK && shortestImplPath.length == 0; ++root)
+	for (var root = 0; root < nK && shortestImplPath.length == 0; ++root)
 	{
 		if (implicationClass[root] == -1)
 		{
-			var queue = new CircularQueue(K.list.length);
+			var queue = new CircularQueue(nK);
 			function visit(y, x)
 			{
 				queue.push(x);
@@ -948,28 +948,27 @@ function findAnchoredInvertiblePairAlt(G)
 				if (implicationClass[vu] == root) // path between them
 				{
 					const implPath = recoverPathFromBFSTree(prev, x, vu);
-					if (implPath.length < shortestImplPath.length)
+					if (shortestImplPath.length == 0 || implPath.length < shortestImplPath.length)
 					{
 						shortestImplPath = implPath;
 					}
-					
 				}
 			}
 			visit(-1, root);
 			while (queue.length() > 0 && shortestImplPath.length == 0)
 			{
 				const x = queue.pop();
-				for (var i = 0; i < K.list[u].length; ++i)
+				for (var i = 0; i < K.list[x].length; ++i)
 				{
-					const y = K.list[u][i];
+					const y = K.list[x][i];
 					if (implicationClass[y] == -1)
 					{
-						visit(u, v);
+						visit(x, y);
 					}
 				}
 			}
 		}
-	}*/
+	}
 	var P = [];
 	var Q = [];
 	for (var i = 0; i < shortestImplPath.length; ++i)

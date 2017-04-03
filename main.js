@@ -941,7 +941,7 @@ function runFindAnchoredInvertiblePair(useAlternate)
 	printPath("P", P);
 	printPath("Q", Q);
 	
-	G = aop[5];//completion;
+	G = completion;
 	
 	randomizeVertexPositions();
 	
