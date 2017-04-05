@@ -53,6 +53,7 @@ function removeVertex(G, id)
 			{
 				neighbors[i] = neighbors[neighbors.length - 1];
 				neighbors.pop();
+				--i;
 			}
 			else if (neighbors[i] == lastID)
 			{

@@ -897,7 +897,7 @@ function findAnchoredInvertiblePairAlt(G)
 				{
 					HtoK[u][v] = addVertex(K);
 					KtoH.push([u, v]);
-					console.log("(" + u + "," + v + " );  ");
+					//console.log("(" + u + "," + v + " );  ");
 				}
 			}
 		}

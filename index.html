@@ -34,7 +34,7 @@
 		<option value="compute_edge_types">Inclusion Edges</option>
 		<option value="remove_ttu">Remove True-Twins/Universal</option>
 		<option value="find_anchored_invertible_pair">Find Anchored Invertible Pair</option>
-		<option value="find_anchored_invertible_pair2">Find Anchored Invertible Pair 2</option>
+		<option selected value="find_anchored_invertible_pair2">Find Anchored Invertible Pair 2</option>
 	</select>
 	
 	<button onClick="menuAlgorithmRun()">Run</button>
@@ -60,21 +60,18 @@
 	</div>
 	<div style="position:relative;">
 	<textarea id="adj_list_textbox_id" rows="30", cols="32">
-10
-3 1 4 7
-3 0 2 9
-3 1 3 6
-3 2 4 8
-3 0 3 5
-3 4 6 9
-3 2 5 7
-3 0 6 8
-3 3 7 9
-3 1 5 8
+7
+1 1
+3 2 3 0
+3 4 3 1
+3 2 1 5
+1 2
+1 3
+0
 	</textarea>
 	</div>
 	<p>
-	<textarea id="output_textbox_id" rows="2", cols="112"></textarea>
+	<textarea id="output_textbox_id" rows="3", cols="112"></textarea>
 	
 	<br><a href = "https://en.wikipedia.org/wiki/Adjacency_list">Adjacency List</a>:
 	<button onClick="readFromList()">Import</button>

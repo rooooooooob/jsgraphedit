@@ -846,7 +846,7 @@ function runCycleAnalyze()
 
 function runCircularCompletion()
 {
-	resetHighlights();
+	vertexHighlights = {};
 	
 	var paired = circularComplete(removeTrueTwinsAndUniversal(G));
 	
@@ -881,7 +881,7 @@ function runCircularCompletion()
 
 function runComputeEdgeTypes()
 {
-	resetHighlights();
+	edgeHighlights = {};
 	
 	const n = G.list.length;
 	
