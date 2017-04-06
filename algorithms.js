@@ -698,6 +698,7 @@ function findAnchoredInvertiblePair(G)
 	//uzCompOffset.fill(-1);
 	//uzComps.fill(0);
 	var uzCompTotal = 0;
+	var potato = [];// potato[x] for x in V(K) is y (in H) if it was created from the yz-components
 	for (var u = 0; u < n; ++u) // u in H
 	{
 		if (types[u][z] != EdgeType.INCLUSION)
@@ -754,6 +755,7 @@ function findAnchoredInvertiblePair(G)
 			uzCompTotal += uzComps[u].length;
 			for (var i = 0; i < uzComps[u].length; ++i)
 			{
+				potato.push(u);
 				for (var j = 0; j < uzComps[u][i].length; ++j) 
 				{
 					const x = uzComps[u][i][j][1]; // x in Xuz
@@ -827,11 +829,11 @@ function findAnchoredInvertiblePair(G)
 	// reconstruct paths
 	var P = [];
 	var Q = [];
-	for (var i = 0; i < oddCycle.length - 2; ++i)// uzBFSPar[u][v] looks up v's parent in the BFS-tree of Xuz
+	for (var i = 0; i < oddCycle.length; ++i)// uzBFSPar[u][v] looks up v's parent in the BFS-tree of Xuz
 	{
-		const v = oddCycle[0];
-		const ui = oddCycle[1];
-		const w = oddCycle[2];
+		const v = potato[oddCycle[(i - 1 + oddCycle.length) % oddCycle.length]];
+		const ui = potato[oddCycle[i]];
+		const w = potato[oddCycle[(i + 1) % oddCycle.length]];
 		const Pi = recoverPathFromBFSTree(uzBFSPar[ui], v, w);
 		var uiPath = new Array(Pi.length);
 		uiPath.fill(ui);
@@ -847,5 +849,5 @@ function findAnchoredInvertiblePair(G)
 		}
 	}
 
-	return [K, types, z, P, Q, oddCycle];
+	return [H, types, z, P, Q, K, oddCycle];
 }

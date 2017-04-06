@@ -918,7 +918,7 @@ function runRemoveTTU()
 function runFindAnchoredInvertiblePair()
 {
 	resetHighlights();
-	
+
 	// todo: draw aop in highlights?
 	const aop = findAnchoredInvertiblePair(G);
 	const completion = aop[0];
@@ -932,7 +932,7 @@ function runFindAnchoredInvertiblePair()
 	
 	function printPath(name, path)
 	{	outputBox.value += name + ": ";
-		for (var i = 0; i < path.length; ++path)
+		for (var i = 0; i < path.length; ++i)
 		{
 			outputBox.value += path[i] + ", ";
 		}
@@ -945,7 +945,22 @@ function runFindAnchoredInvertiblePair()
 	
 	randomizeVertexPositions();
 	
-	const oddCycle = aop[5];
+	const vertexKey = randomColours[(lastRandomColourIndex++) % randomColours.length];
+	vertexHighlights[vertexKey] = [z];
+	
+	function highlightPath(path)
+	{
+		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
+		edgeHighlights[key] = [];
+		for (var i = 0; i < path.length - 1; ++i)
+		{
+			edgeHighlights[key].push([path[i], path[i + 1]]);
+		}
+	}
+	highlightPath(P);
+	highlightPath(Q);
+	
+	/*const oddCycle = aop[5];
 	if (oddCycle.length > 0)
 	{
 		const key = randomColours[(lastRandomColourIndex++) % randomColours.length];
@@ -955,7 +970,7 @@ function runFindAnchoredInvertiblePair()
 			oddCycleEdges.push([oddCycle[i], oddCycle[(i + 1) % oddCycle.length]]);
 		}
 		edgeHighlights[key] = oddCycleEdges;
-	}
+	}*/
 	
 	redraw();
 }
