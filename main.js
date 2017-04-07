@@ -975,6 +975,86 @@ function runFindAnchoredInvertiblePair(useAlternate)
 	redraw();
 }
 
+function analayzeCompletion()
+{
+	resetHighlights();
+	
+	var paired = circularComplete(removeTrueTwinsAndUniversal(G));
+	
+	G = paired[0];
+	runComputeEdgeTypes();
+	const n = G.list.length;
+	
+	var outputBox = document.getElementById("output_textbox_id");
+	outputBox.value = "CircularPairs "
+	
+	for (var i = 0; i < paired[1].length; ++i)
+	{
+		const key = randomColours[i % randomColours.length];
+		if (!vertexHighlights[key])
+		{
+			vertexHighlights[key] = [];
+		}
+		const u = paired[1][i][0];
+		const v=  paired[1][i][1];
+		vertexHighlights[key].push(u, v);
+		outputBox.value += ", (" + u + "," + v + ")"
+	}
+	
+	var z = 0;
+	for (var i = 1; i < G.list.length; ++i)
+	{
+		if (G.list[i].length < G.list[z].length)
+		{
+			z = i;
+		}
+	}
+	
+	var cpair = new Array(n);
+	for (var i = 0; i < paired[1].length; ++i)
+	{
+		const ui = paired[1][i][0];
+		const uibar = paired[1][i][1];
+		cpair[ui] = uibar;
+		cpair[uibar] = ui;
+	}
+	
+	G.pos[z].x = canvas.width / 2;
+	G.pos[z].y = 16;
+	
+	G.pos[cpair[z]].x = canvas.width / 2;
+	G.pos[cpair[z]].y = canvas.height - 16;
+	
+	const zdeg = G.list[z].length;
+	for (var i = 0; i < zdeg; ++i)
+	{
+		const u = G.list[z][i];
+		const ubar = cpair[u];
+		const ux = (0.5 + i) * (canvas.width / zdeg);
+		if (hasEdge(G, z, ubar)) // u/ubar in (2)
+		{
+			//if (u < ubar)
+			//{
+			//	
+			//}
+			
+			G.pos[u].x = ux;
+			G.pos[u].y = canvas.height / 2;
+		}
+		else // u in (1), ubar in (2)
+		{
+			const yoff = 128 - 64 * ((Math.abs(zdeg / 2 - i)) / (zdeg / 2));
+			G.pos[u].x = ux;
+			G.pos[u].y = yoff;
+			G.pos[ubar].x = ux;
+			G.pos[ubar].y = canvas.height - yoff;
+		}
+		
+	}
+	
+	redraw();
+}
+
 function menuAlgorithmChanged()
 {
 	switch (document.getElementById("menu_algorithm_select_id").value)
@@ -1000,6 +1080,8 @@ function menuAlgorithmChanged()
 		case "find_anchored_invertible_pair":
 			break;
 		case "find_anchored_invertible_pair2":
+			break;
+		case "analayze_completion":
 			break;
 	}
 }
@@ -1040,6 +1122,9 @@ function menuAlgorithmRun()
 			break;
 		case "find_anchored_invertible_pair2":
 			runFindAnchoredInvertiblePair(true);
+			break;
+		case "analayze_completion":
+			analayzeCompletion();
 			break;
 	}
 }
