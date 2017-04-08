@@ -35,6 +35,8 @@ const randomColours = [
 var satisfyConnected;
 var satisfyTree;
 var satisfyCycles;
+var isVertexDrawn;
+var isDrawingSubgraph;
 
 function initialise()
 {
@@ -46,6 +48,8 @@ function initialise()
 	canvas.addEventListener("keydown", onKeyDown, false);
 	var backCanvas = document.getElementById("back_canvas");
 	backContext = backCanvas.getContext("2d");
+	isVertexDrawn = [];
+	isDrawingSubgraph = false;
 	
 	satisfyConnected = {
 		str : "connected",
@@ -78,6 +82,7 @@ function initialise()
 	}
 	randomizeVertexPositions();
 	
+	resetHighlights();
 	
 	redraw();
 }
@@ -123,27 +128,31 @@ function redraw()
 		for (var i = 0; i < neighbors.length; ++i)
 		{
 			const v = neighbors[i];
-			// u < v so we don't draw each edge twice
-			// and also for easily checking against selected edge
-			// also don't draw the clicked down one - it is drawn in redrawAnims()
-			// but only if we're moving it!!!			
-			if (u < v && (u != clickedVertex && v != clickedVertex) || selectedVertex == -1)
+			if (!isDrawingSubgraph || (isVertexDrawn[u] && isVertexDrawn[v]))
 			{
-				if (selectedEdge[0] == u && selectedEdge[1] == v)
+			
+				// u < v so we don't draw each edge twice
+				// and also for easily checking against selected edge
+				// also don't draw the clicked down one - it is drawn in redrawAnims()
+				// but only if we're moving it!!!			
+				if (u < v && (u != clickedVertex && v != clickedVertex) || selectedVertex == -1)
 				{
+					if (selectedEdge[0] == u && selectedEdge[1] == v)
+					{
+						backContext.beginPath();
+						backContext.strokeStyle = "#AA0000";
+						backContext.lineWidth = 9;
+						backContext.moveTo(G.pos[u].x, G.pos[u].y);
+						backContext.lineTo(G.pos[v].x, G.pos[v].y);
+						backContext.stroke();
+					}
 					backContext.beginPath();
-					backContext.strokeStyle = "#AA0000";
-					backContext.lineWidth = 9;
+					backContext.strokeStyle = "#000000";
+					backContext.lineWidth = 3;
 					backContext.moveTo(G.pos[u].x, G.pos[u].y);
 					backContext.lineTo(G.pos[v].x, G.pos[v].y);
 					backContext.stroke();
 				}
-				backContext.beginPath();
-				backContext.strokeStyle = "#000000";
-				backContext.lineWidth = 3;
-				backContext.moveTo(G.pos[u].x, G.pos[u].y);
-				backContext.lineTo(G.pos[v].x, G.pos[v].y);
-				backContext.stroke();
 			}
 		}
 	}
@@ -167,36 +176,38 @@ function redraw()
 			// have one higher bezierIndex than the toher
 			const u = Math.min(edgeHighlights[col][i][0], edgeHighlights[col][i][1]);
 			const v = Math.max(edgeHighlights[col][i][0], edgeHighlights[col][i][1]);
-			
-			var bezierOffset = edgeHighlightCount[v][u];
-			++(edgeHighlightCount[v][u]);
-			
-			
-			backContext.beginPath();
-			backContext.strokeStyle = col;
-			backContext.lineWidth = 4;
-			backContext.moveTo(G.pos[u].x, G.pos[u].y);
-			if (bezierOffset == 0)
+			if (!isDrawingSubgraph || (isVertexDrawn[u] && isVertexDrawn[v]))
 			{
-				backContext.lineTo(G.pos[v].x, G.pos[v].y);
+				var bezierOffset = edgeHighlightCount[v][u];
+				++(edgeHighlightCount[v][u]);
+				
+				
+				backContext.beginPath();
+				backContext.strokeStyle = col;
+				backContext.lineWidth = 4;
+				backContext.moveTo(G.pos[u].x, G.pos[u].y);
+				if (bezierOffset == 0)
+				{
+					backContext.lineTo(G.pos[v].x, G.pos[v].y);
+				}
+				else
+				{
+					// flip norm across the line on odd lines so that they alternate
+					const normAngle = (bezierOffset % 2 == 0) ? (Math.PI / 2) : (-Math.PI / 2);
+					bezierOffset = Math.floor((bezierOffset + 1) / 2);
+					const midx = (G.pos[u].x + G.pos[v].x) / 2;
+					const midy = (G.pos[u].y + G.pos[v].y) / 2;
+					const xdif = G.pos[v].x - G.pos[u].x;
+					const ydif = G.pos[v].y - G.pos[u].y;
+					const dist = Math.sqrt(xdif * xdif + ydif * ydif);
+					const norm = Math.atan2(ydif, xdif) + normAngle;
+					const normScalar = 3 + bezierOffset * 1.3 + bezierOffset * 0.1 * Math.pow(dist, 0.9);
+					const controlx = midx + normScalar * Math.cos(norm);
+					const controly = midy + normScalar * Math.sin(norm);
+					backContext.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
+				}
+				backContext.stroke();
 			}
-			else
-			{
-				// flip norm across the line on odd lines so that they alternate
-				const normAngle = (bezierOffset % 2 == 0) ? (Math.PI / 2) : (-Math.PI / 2);
-				bezierOffset = Math.floor((bezierOffset + 1) / 2);
-				const midx = (G.pos[u].x + G.pos[v].x) / 2;
-				const midy = (G.pos[u].y + G.pos[v].y) / 2;
-				const xdif = G.pos[v].x - G.pos[u].x;
-				const ydif = G.pos[v].y - G.pos[u].y;
-				const dist = Math.sqrt(xdif * xdif + ydif * ydif);
-				const norm = Math.atan2(ydif, xdif) + normAngle;
-				const normScalar = 3 + bezierOffset * 1.3 + bezierOffset * 0.1 * Math.pow(dist, 0.9);
-				const controlx = midx + normScalar * Math.cos(norm);
-				const controly = midy + normScalar * Math.sin(norm);
-				backContext.quadraticCurveTo(controlx, controly, G.pos[v].x, G.pos[v].y);
-			}
-			backContext.stroke();
 		}
 	}
 	// draw vertices on top
@@ -228,25 +239,30 @@ function redraw()
 
 function drawVertex(context, u, colour)
 {
-	context.beginPath();
-	context.arc(G.pos[u].x, G.pos[u].y, vertexSize, 0, 2*Math.PI);
-	context.fillStyle = colour;
-	context.fill();
-	context.lineWidth = 3;
-	context.strokeStyle = "#000000";
-	context.stroke();
-	context.font = "12px Arial";
-	context.lineWidth = 1;
-	context.textAlign = "center";
-	context.textBaseline = "middle";
-	context.fillStyle = "#000000";
-	context.fillText(u, G.pos[u].x, G.pos[u].y);
+	if (!isDrawingSubgraph || isVertexDrawn[u])
+	{
+		context.beginPath();
+		context.arc(G.pos[u].x, G.pos[u].y, vertexSize, 0, 2*Math.PI);
+		context.fillStyle = colour;
+		context.fill();
+		context.lineWidth = 3;
+		context.strokeStyle = "#000000";
+		context.stroke();
+		context.font = "12px Arial";
+		context.lineWidth = 1;
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.fillStyle = "#000000";
+		context.fillText(u, G.pos[u].x, G.pos[u].y);
+	}
 }
 
 function resetHighlights()
 {
 	edgeHighlights = {};
 	vertexHighlights = {};
+	isVertexDrawn = new Array(G.list.length);
+	isVertexDrawn.fill(true);
 }
 
 function getVertexAt(x, y)
@@ -1022,8 +1038,12 @@ function analayzeCompletion()
 	G.pos[z].x = canvas.width / 2;
 	G.pos[z].y = 16;
 	
-	G.pos[cpair[z]].x = canvas.width / 2;
-	G.pos[cpair[z]].y = canvas.height - 16;
+	const zbar = cpair[z];
+	G.pos[zbar].x = canvas.width / 2;
+	G.pos[zbar].y = canvas.height - 16;
+	
+	isVertexDrawn[z] = false;
+	isVertexDrawn[zbar] = true;
 	
 	const zdeg = G.list[z].length;
 	for (var i = 0; i < zdeg; ++i)
@@ -1040,6 +1060,7 @@ function analayzeCompletion()
 			
 			G.pos[u].x = ux;
 			G.pos[u].y = canvas.height / 2;
+			isVertexDrawn[u] = true;
 		}
 		else // u in (1), ubar in (2)
 		{
@@ -1048,11 +1069,57 @@ function analayzeCompletion()
 			G.pos[u].y = yoff;
 			G.pos[ubar].x = ux;
 			G.pos[ubar].y = canvas.height - yoff;
+			isVertexDrawn[u] = false;
+			isVertexDrawn[ubar] = true;
 		}
 		
 	}
 	
 	redraw();
+}
+
+function toggleSubgraphDraw()
+{
+	var div = document.getElementById("subgraph_checkboxes_id");
+	var button = document.getElementById("draw_subgraph_button_id");
+	if (isDrawingSubgraph)
+	{
+		isDrawingSubgraph = false;
+		button.innerHTML = "Draw Subgraph";
+		while (div.hasChildNodes())
+		{
+			div.removeChild(div.lastChild);
+		}
+	}
+	else
+	{
+		isDrawingSubgraph = true;
+		button.innerHTML = "Entire Graph";
+		for (var i = 0; i < G.list.length; ++i)
+		{
+			const id = "vertex_checkbox_" + i;
+			//var box = document.createElement("div");
+			
+			var text = document.createElement("label");
+			text.setAttribute("for", id);
+			text.innerHTML = i.toString();
+			div.appendChild(text);
+
+			var checkbox = document.createElement("input");
+			checkbox.setAttribute("type", "checkbox");
+			checkbox.setAttribute("id", id);
+			checkbox.checked = isVertexDrawn[i];
+			checkbox.onclick = (function(i, checkbox) {
+				return function() {
+					isVertexDrawn[i] = checkbox.checked;
+					redraw();
+				}
+			})(i, checkbox);
+			div.appendChild(checkbox);
+			
+			//div.appendChild(box);
+		}
+	}
 }
 
 function menuAlgorithmChanged()
