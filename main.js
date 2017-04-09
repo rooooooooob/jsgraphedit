@@ -1210,7 +1210,7 @@ function menuGenerate(genFunc, settings)
 {
 	const n = parseInt(document.getElementById("gen_vertices_id").value)
 
-	if (n != NaN)
+	if (!isNaN(n))
 	{
 		var settings = settings || {};	
 		settings.n = n;
