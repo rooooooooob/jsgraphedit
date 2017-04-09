@@ -1095,16 +1095,26 @@ function toggleSubgraphDraw()
 	{
 		isDrawingSubgraph = true;
 		button.innerHTML = "Entire Graph";
+		const tableWidth = 32;
+		var table = document.createElement("table");
+		//table.border = 1;
+		var row;
 		for (var i = 0; i < G.list.length; ++i)
 		{
+			if (i % tableWidth == 0)
+			{
+				row = table.insertRow(-1);
+			}
 			const id = "vertex_checkbox_" + i;
-			//var box = document.createElement("div");
 			
-			var text = document.createElement("label");
-			text.setAttribute("for", id);
-			text.innerHTML = i.toString();
-			div.appendChild(text);
-
+			//var text = document.createElement("label");
+			//text.setAttribute("for", id);
+			//text.innerHTML = ";   " + i.toString();
+			//box.appendChild(text);
+			var text = row.insertCell(-1);
+			text.align = "center";
+			text.innerHTML = i.toString() + "<br>";
+			
 			var checkbox = document.createElement("input");
 			checkbox.setAttribute("type", "checkbox");
 			checkbox.setAttribute("id", id);
@@ -1115,11 +1125,11 @@ function toggleSubgraphDraw()
 					redraw();
 				}
 			})(i, checkbox);
-			div.appendChild(checkbox);
-			
-			//div.appendChild(box);
+			text.appendChild(checkbox);
 		}
+		div.appendChild(table);
 	}
+	redraw();
 }
 
 function menuAlgorithmChanged()
