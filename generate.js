@@ -496,3 +496,30 @@ function circularComplete(G)
 	}
 	return [H, pairs];
 }
+
+// returns G[X]
+function inducedSubgraph(G, X)
+{
+	var H = createGraph(X.length);
+	var GtoH = new Array(G.list.length);
+	GtoH.fill(-1);
+	for (var i = 0; i < X.length; ++i)
+	{
+		GtoH[X[i]] = i;
+	}
+	for (var u = 0; u < G.list.length; ++u)
+	{
+		if (GtoH[u] != -1)
+		{
+			for (var j = 0; j < G.list.length;  ++j)
+			{
+				const v = G.list[u][j];
+				if (GtoH[v] != -1)
+				{
+					addEdge(H, GtoH[u], GtoH[v]);
+				}
+			}
+		}
+	}
+	return H;
+}
