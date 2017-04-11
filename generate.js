@@ -511,7 +511,9 @@ function inducedSubgraph(G, X)
 	{
 		if (GtoH[u] != -1)
 		{
-			for (var j = 0; j < G.list.length;  ++j)
+			H.pos[GtoH[u]].x = G.pos[u].x;
+			H.pos[GtoH[u]].y = G.pos[u].y
+			for (var j = 0; j < G.list[u].length;  ++j)
 			{
 				const v = G.list[u][j];
 				if (GtoH[v] != -1)
