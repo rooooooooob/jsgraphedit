@@ -424,17 +424,14 @@ function circularPairs(G)
 				var paired = true;
 				for (var w = 0; w < n; ++w)
 				{
-					if (w != u && !hasEdge(G, u, w) && type[w][v] != EdgeType.INCLUSION)
+					if (w != u && w != v)
 					{
-						paired = false;
-						break;
-					}
-				}
-				if (paired)
-				{
-					for (var w = 0; w < n; ++w)
-					{
-						if (w != v && !hasEdge(G, v, w) && type[w][u] != EdgeType.INCLUSION)
+						if (!hasEdge(G, u, w) && !(type[w][v] == EdgeType.INCLUSION && G.list[w].length <= G.list[v].length))
+						{
+							paired = false;
+							break;
+						}
+						if (!hasEdge(G, v, w) && !(type[w][u] == EdgeType.INCLUSION && G.list[w].length <= G.list[u].length))
 						{
 							paired = false;
 							break;
