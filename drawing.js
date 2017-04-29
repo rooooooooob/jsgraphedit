@@ -19,12 +19,15 @@ function redrawAnims()
 		for (var i = 0; i < G.list[selectedVertex].length; ++i)
 		{
 			const v = G.list[selectedVertex][i];
-			animContext.beginPath();
-			animContext.strokeStyle = "#000000";
-			animContext.lineWidth = 4;
-			animContext.moveTo(G.pos[selectedVertex].x, G.pos[selectedVertex].y);
-			animContext.lineTo(G.pos[v].x, G.pos[v].y);
-			animContext.stroke();
+			if (!isDrawingSubgraph || (isVertexDrawn[selectedVertex] && isVertexDrawn[v]))
+			{
+				animContext.beginPath();
+				animContext.strokeStyle = "#000000";
+				animContext.lineWidth = 4;
+				animContext.moveTo(G.pos[selectedVertex].x, G.pos[selectedVertex].y);
+				animContext.lineTo(G.pos[v].x, G.pos[v].y);
+				animContext.stroke();
+			}
 		}
 		drawVertex(animContext, selectedVertex, "#555555");
 	}
