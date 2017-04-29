@@ -91,11 +91,14 @@ function getVertexAt(x, y)
 {
 	for (var id = 0; id < G.list.length; ++id)
 	{
-		const difX = G.pos[id].x - x;
-		const difY = G.pos[id].y - y;
-		if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
+		if (!isDrawingSubgraph || isVertexDrawn[id])
 		{
-			return id;
+			const difX = G.pos[id].x - x;
+			const difY = G.pos[id].y - y;
+			if (Math.sqrt(difX*difX + difY*difY) <= vertexSize)
+			{
+				return id;
+			}
 		}
 	}
 	return -1;
@@ -108,7 +111,8 @@ function getEdgeAt(x, y)
 		for (var i = 0; i < G.list[u].length; ++i)
 		{
 			const v = G.list[u][i];
-			if (u < v) // to prevent checking the same edge twice
+			const edgeDrawn = !isDrawingSubgraph || (isVertexDrawn[u] && isVertexDrawn[v]);
+			if (edgeDrawn && u < v) // to prevent checking the same edge twice
 			{
 				// project the u-mouse vector onto the u-v vector
 				// then subtrct it from the mouse vector to get
