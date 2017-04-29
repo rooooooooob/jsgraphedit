@@ -17,7 +17,7 @@ var vertexHighlights = {};
 var lastRandomColourIndex = 0;
 const randomColours = [
 	"#FF0000",
-	"#0000FF",
+	"#2277FF",
 	"#00AA00",
 	"#FF00FF",
 	"#00AAAA",
@@ -779,9 +779,14 @@ function runFindAnchoredInvertiblePair(useAlternate)
 	printPath("P", P);
 	printPath("Q", Q);
 	
-	G = completion;
+	// only randomize new vertices
+	for (var u = G.list.length; u < completion.list.length; ++u)
+	{
+		completion.pos[u].x = Math.random() * canvas.width;
+		completion.pos[u].y = Math.random() * canvas.height;
+	}
 	
-	randomizeVertexPositions();
+	G = completion;
 	
 	const vertexKey = randomColours[(lastRandomColourIndex++) % randomColours.length];
 	vertexHighlights[vertexKey] = [z];
@@ -809,22 +814,29 @@ function runFindAnchoredInvertiblePair(useAlternate)
 		}
 		edgeHighlights[key] = oddCycleEdges;
 	}*/
-	
+
 	redraw();
 }
 
 function analayzeCompletion()
 {
 	resetHighlights();
-	
-	var paired = circularComplete(removeTrueTwinsAndUniversal(G));
+	var old = removeTrueTwinsAndUniversal(G);
+	var oldn = old.list.length;
+	var oldm = 0;
+	for (var i = 0; i < oldn; ++i)
+	{
+		oldm += old.list[i].length;
+	}
+	oldm /= 2;
+	var paired = circularComplete(old);
 	
 	G = paired[0];
 	runComputeEdgeTypes();
 	const n = G.list.length;
 	
 	var outputBox = document.getElementById("output_textbox_id");
-	outputBox.value = "CircularPairs "
+	//outputBox.value = "CircularPairs "
 	
 	for (var i = 0; i < paired[1].length; ++i)
 	{
@@ -836,7 +848,7 @@ function analayzeCompletion()
 		const u = paired[1][i][0];
 		const v=  paired[1][i][1];
 		vertexHighlights[key].push(u, v);
-		outputBox.value += ", (" + u + "," + v + ")"
+		//outputBox.value += ", (" + u + "," + v + ")"
 	}
 	
 	var z = 0;
@@ -867,7 +879,14 @@ function analayzeCompletion()
 	isVertexDrawn[z] = false;
 	isVertexDrawn[zbar] = true;
 	
+	const types = computeEdgeTypes(G);
 	const zdeg = G.list[z].length;
+	var zoverlap = [];
+	// count edge types
+	var newm = 0;
+	var BB = 0;
+	var BC = 0;
+	var CC = 0;
 	for (var i = 0; i < zdeg; ++i)
 	{
 		const u = G.list[z][i];
@@ -883,8 +902,25 @@ function analayzeCompletion()
 			G.pos[u].x = ux;
 			G.pos[u].y = canvas.height / 2;
 			isVertexDrawn[u] = true;
+			zoverlap.push(u);
+			for (var j = 0; j < G.list[u].length; ++j)
+			{
+				var v = G.list[u][j];
+				if (v != zbar && types[z][v] != EdgeType.INCLUSION)
+				{
+					++newm;
+					if (types[v][z] == EdgeType.NON_EDGE)
+					{
+						++BC;
+					}
+					else
+					{
+						++BB;
+					}
+				}
+			}
 		}
-		else // u in (1), ubar in (2)
+		else // u in (1), ubar in (3)
 		{
 			const yoff = 128 - 64 * ((Math.abs(zdeg / 2 - i)) / (zdeg / 2));
 			G.pos[u].x = ux;
@@ -893,7 +929,64 @@ function analayzeCompletion()
 			G.pos[ubar].y = canvas.height - yoff;
 			isVertexDrawn[u] = false;
 			isVertexDrawn[ubar] = true;
+			for (var j = 0; j < G.list[u].length; ++j)
+			{
+				var v = G.list[u][j];
+				if (v != z && types[v][z] == EdgeType.INCLUSION && types[u][v] == EdgeType.INCLUSION)
+				{
+					//alert("inclusion in (1) from " + u + " to " + v);
+				}
+			}
+			for (var j = 0; j < G.list[ubar].length; ++j)
+			{
+				var v = G.list[ubar][j];
+				if (v != zbar && types[v][zbar] == EdgeType.INCLUSION && types[ubar][v] == EdgeType.INCLUSION)
+				{
+					//alert("inclusion in (3) from " + ubar + " to " + v);
+				}
+				if (v != zbar && types[v][z] != EdgeType.INCLUSION)
+				{
+					++newm;
+					if (types[v][z] == EdgeType.NON_EDGE)
+					{
+						++CC;
+					}
+					else
+					{
+						++BC;
+					}
+				}
+			}
+			if (ubar >= old.list.length)
+			{
+				alert("too bad :(");
+			}
+			if (G.list[u].length < G.list[ubar].length)
+			{
+				alert("deg(" + u + ") = " + G.list[u].length + " < " + G.list[ubar].length + " = deg(" + ubar + ")");
+			}
 		}
+		
+	}
+	newm /= 2;
+	BB /= 2;
+	BC /= 2;
+	CC /= 2;
+
+	if (newm > oldm + oldn)
+	{
+		alert("n = " + oldn + "; m = " + oldm + "; m' = " + newm);
+		exportToList();
+	}
+	outputBox.value = "n = " + oldn + "; m = " + oldm + "; m' = " + newm + "\n";
+	outputBox.value += "|B| = " + zoverlap.length + "; |C| = " + ((G.list.length - 2 - zoverlap.length)/2) + "; BB = " + BB + "; BC = " + BC + "; CC = " + CC + "\n";
+	
+	//outputBox.value += "\nBipartite? " + bipartite;
+	//outputBox.value += ";  zoverlapInclusion = " + (zoverlapInclusion) + "; |(2)| = " + zoverlap.length;//+ (n - 2 - zoverlap.length)/2;
+	//if (zoverlapInclusion > zoverlap.length)//(n - 2 - zoverlap.length)/2)
+	{
+		//alert(";  zoverlapInclusion = " + (zoverlapInclusion) + "; |(2)| = " + zoverlap.length);//(n - 2 - zoverlap.length)/2);
+		//exportToList();
 		
 	}
 	
@@ -1036,7 +1129,7 @@ function menuGenerate(genFunc, settings)
 	{
 		var settings = settings || {};	
 		settings.n = n;
-	
+		
 		G = genFunc(settings);
 		
 		resetHighlights();
