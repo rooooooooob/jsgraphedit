@@ -882,6 +882,22 @@ function findAnchoredInvertiblePairAlt(G)
 	var K = createGraph(0);
 	var KtoH = []; // KtoH[x] = [u, v] is x is the (u, v)
 	var HtoK = new Array(n);
+	var cpair = new Array(n);
+	for (var i = 0; i < pairs.length; ++i)
+	{
+		const ui = pairs[i][0];
+		const uibar = pairs[i][1];
+		cpair[ui] = uibar;
+		cpair[uibar] = ui;
+	}
+	// does this work?
+	function vname(x)
+	{
+		if (x < n / 2)
+			return String.fromCharCode(65 + x);
+		else
+			return String.fromCharCode(97 + (x - (n/2)));
+	}
 	for (var i = 0; i < n; ++i)
 	{
 		HtoK[i] = new Array(n);
@@ -897,7 +913,7 @@ function findAnchoredInvertiblePairAlt(G)
 				{
 					HtoK[u][v] = addVertex(K);
 					KtoH.push([u, v]);
-					//console.log("(" + u + "," + v + " );  ");
+					//console.log("added vertex (" + vname(u) + "," + vname(v) + " );  ");
 				}
 			}
 		}
@@ -909,6 +925,8 @@ function findAnchoredInvertiblePairAlt(G)
 		if (avoidsVertex(types, z, x_1, x_2) && avoidsVertex(types, z, y_1, y_2)
 			&& avoidsEdge(types, x_1, x_2, y_1, y_2))
 		{
+			//if (!hasEdge(K, HtoK[x_1][y_1], HtoK[x_2][y_2]))
+				//console.log("joined (" + vname(x_1) + ", " + vname(y_1) + ") to (" + vname(x_2) + ", " + vname(y_2) + ")");
 			addEdge(K, HtoK[x_1][y_1], HtoK[x_2][y_2]);
 		}
 	}

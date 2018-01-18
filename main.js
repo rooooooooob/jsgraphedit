@@ -115,7 +115,7 @@ function getEdgeAt(x, y)
 			if (edgeDrawn && u < v) // to prevent checking the same edge twice
 			{
 				// project the u-mouse vector onto the u-v vector
-				// then subtrct it from the mouse vector to get
+				// then subtract it from the mouse vector to get
 				// a vector from the line to the mouse perp to the edge
 				const umx = x - G.pos[u].x;
 				const umy = y - G.pos[u].y;

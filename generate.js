@@ -408,6 +408,60 @@ function generateChordal(settings)
 }
 
 // returns [[u, ~u], [v, ~v]..] a list of circular pairs in G
+/*function circularPairs(G)
+{
+	const n = G.list.length;
+	const type = computeEdgeTypes(G);
+	var pairs = [];
+	
+	var validPair = new Array(n);
+	for (var i = 0; i < n; ++i)
+	{
+		validPair[i] = new Array(n);
+		validPair[i].fill(true);
+	}
+	function isSubset(x, y)
+	{
+		return type[x][y] == EdgeType.INCLUSION && G.list[x].length <= G.list[y].length;
+	}
+	for (var u = 0; u < n; ++u)
+	{
+		for (var i = 0; i < G.list[u].length; ++i)
+		{
+			const w = G.list[u][i];
+			// if N[u] is not a subet of N[w], then we can't have vw not in E, if {u, v} is a circular pair
+			if (!isSubset(w, u))
+			{
+				for (var v = u + 1; v < n; ++v)
+				{
+					if (w != v &&)
+					{
+						if (hasEdge(G, w, v))
+						{
+							validPair[u][v] = true;
+						}
+						else
+						{
+							validPair[u][v] = false;
+						}
+					}
+				}
+			}
+		}
+	}
+	for (var u = 0; u < n; ++u)
+	{
+		for (var v = u + 1; v < n; ++v)
+		{
+			if (validPair[u][v] && validPair[v][u])
+			{
+				
+			}
+		}
+	}
+	return pairs;
+}*/
+
 function circularPairs(G)
 {
 	const n = G.list.length;
